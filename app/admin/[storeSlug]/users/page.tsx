@@ -24,7 +24,9 @@ export default function UsersPage() {
   const storeSlug = params.storeSlug as string;
 
   const [users, setUsers] = useState<StoreUserResponse[]>([]);
-  const [currentUser, setCurrentUser] = useState<StoreUserResponse | null>(null);
+  const [currentUser, setCurrentUser] = useState<StoreUserResponse | null>(
+    null
+  );
   const [isLoading, setIsLoading] = useState(true);
 
   async function load() {
@@ -69,7 +71,9 @@ export default function UsersPage() {
   }
 
   useEffect(() => {
-    if (storeSlug) load();
+    if (storeSlug) {
+      load();
+    }
   }, [storeSlug]);
 
   if (isLoading) {
@@ -95,6 +99,7 @@ export default function UsersPage() {
               <h1 className="text-3xl font-black tracking-tight text-slate-900">
                 Equipe Ativa
               </h1>
+
               <p className="text-sm font-medium italic text-slate-500">
                 Membros com acesso direto ao painel da sua loja.
               </p>
@@ -107,6 +112,7 @@ export default function UsersPage() {
         {users.map((user) => {
           const isOwner = user.role === "OWNER";
           const safeName = user.name || "Membro sem nome";
+
           const initials =
             safeName
               .split(" ")
@@ -124,13 +130,21 @@ export default function UsersPage() {
               <CardContent className="p-8">
                 <div className="flex flex-col items-center space-y-4 text-center">
                   <div
-                    className={`relative flex h-20 w-20 items-center justify-center rounded-3xl text-2xl font-black shadow-inner transition-transform duration-500 group-hover:scale-105 ${
+                    className={`relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-3xl text-2xl font-black shadow-inner transition-transform duration-500 group-hover:scale-105 ${
                       isOwner
                         ? "bg-amber-50 text-amber-600"
                         : "bg-slate-50 text-slate-400"
                     }`}
                   >
-                    {initials}
+                    {user.pictureUrl ? (
+                      <img
+                        src={user.pictureUrl}
+                        alt={safeName}
+                        className="h-full w-full object-cover"
+                      />
+                    ) : (
+                      initials
+                    )}
 
                     {isOwner && (
                       <div className="absolute -right-2 -top-2 rounded-xl border-2 border-white bg-amber-500 p-1.5 text-white shadow-lg">
@@ -146,6 +160,7 @@ export default function UsersPage() {
 
                     <div className="flex items-center justify-center gap-1.5 text-slate-400">
                       <Mail size={12} />
+
                       <span className="text-sm font-medium">
                         {user.email || "Email não informado"}
                       </span>
@@ -195,6 +210,7 @@ export default function UsersPage() {
 
         <div className="space-y-1">
           <h4 className="text-lg font-bold">Segurança da sua conta</h4>
+
           <p className="max-w-2xl text-sm font-medium leading-relaxed text-indigo-100">
             Membros com cargo de colaborador podem gerenciar produtos e
             categorias, mas não podem remover pessoas da equipe, convidar novos
