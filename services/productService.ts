@@ -68,6 +68,21 @@ export const productService = {
     );
   },
 
+  async getRelatedProducts(
+    storeSlug: string,
+    productSlug: string,
+    limit = 10
+  ): Promise<ProductResponse[]> {
+    return unwrap(
+      await api.get<ProductResponse[]>(
+        `/stores/${storeSlug}/products/slug/${productSlug}/related`,
+        {
+          params: { limit },
+        }
+      )
+    );
+  },
+
   async getProductsByCategory(
     storeSlug: string,
     categorySlug: string,

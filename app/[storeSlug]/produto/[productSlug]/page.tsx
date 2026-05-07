@@ -14,6 +14,7 @@ export default function ProductPage() {
 
   const [store, setStore] = useState<StoreResponse | null>(null);
   const [product, setProduct] = useState<ProductResponse | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<ProductResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -21,13 +22,16 @@ export default function ProductPage() {
       try {
         setIsLoading(true);
 
-        const [storeData, productData] = await Promise.all([
-          storeService.getStoreBySlug(storeSlug),
-          productService.getProductBySlug(storeSlug, productSlug),
-        ]);
+        const [storeData, productData, relatedProductsData] =
+          await Promise.all([
+            storeService.getStoreBySlug(storeSlug),
+            productService.getProductBySlug(storeSlug, productSlug),
+            productService.getRelatedProducts(storeSlug, productSlug, 10),
+          ]);
 
         setStore(storeData);
         setProduct(productData);
+        setRelatedProducts(relatedProductsData);
       } finally {
         setIsLoading(false);
       }
@@ -39,13 +43,17 @@ export default function ProductPage() {
   }, [storeSlug, productSlug]);
 
   if (isLoading) return <div className="p-6">Carregando...</div>;
-  if (!store || !product) return <div className="p-6">Produto não encontrado.</div>;
+
+  if (!store || !product) {
+    return <div className="p-6">Produto não encontrado.</div>;
+  }
 
   return (
-  <StoreTemplateRenderer
-    type="product"
-    store={store}
-    product={product}
-  />
-);
+    <StoreTemplateRenderer
+      type="product"
+      store={store}
+      product={product}
+      relatedProducts={relatedProducts}
+    />
+  );
 }

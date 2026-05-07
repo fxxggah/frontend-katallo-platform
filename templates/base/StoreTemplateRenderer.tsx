@@ -9,17 +9,13 @@ import type {
 import { getTemplate } from "./registry";
 import type { StoreResponse } from "@/types";
 
-type TemplateType = "home" | "category" | "product" | "cart";
-
 type StoreTemplateRendererProps =
   | ({ type: "home" } & HomeTemplateProps)
   | ({ type: "category" } & CategoryTemplateProps)
   | ({ type: "product" } & ProductTemplateProps)
   | ({ type: "cart" } & CartTemplateProps);
 
-export function StoreTemplateRenderer(
-  props: StoreTemplateRendererProps
-) {
+export function StoreTemplateRenderer(props: StoreTemplateRendererProps) {
   const store: StoreResponse = props.store;
 
   const template = getTemplate(store.template);
@@ -48,6 +44,7 @@ export function StoreTemplateRenderer(
         <template.Product
           store={props.store}
           product={props.product}
+          relatedProducts={props.relatedProducts}
         />
       );
 

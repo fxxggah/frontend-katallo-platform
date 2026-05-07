@@ -13,13 +13,14 @@ export type HomeTemplateProps = {
 
 export type CategoryTemplateProps = {
   store: StoreResponse;
-  category: CategoryResponse | null;
+  category: CategoryResponse;
   productsPage: PagedResponse<ProductResponse>;
 };
 
 export type ProductTemplateProps = {
   store: StoreResponse;
   product: ProductResponse;
+  relatedProducts?: ProductResponse[];
 };
 
 export type CartTemplateProps = {
