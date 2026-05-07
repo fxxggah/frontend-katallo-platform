@@ -1,6 +1,7 @@
 export type StoreRequest = {
   name: string
   logo?: string
+  favicon?: string
   primaryColor?: string
   secondaryColor?: string
   tertiaryColor?: string
@@ -21,6 +22,7 @@ export type StoreResponse = {
   name: string
   slug: string
   logo?: string
+  favicon?: string
   primaryColor?: string
   secondaryColor?: string
   tertiaryColor?: string
