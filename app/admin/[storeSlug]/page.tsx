@@ -574,10 +574,10 @@ export default function AdminStoreDashboardPage() {
           <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg font-black text-slate-900">
-                Produtos mais vistos
+                Top 5 mais vistos
               </CardTitle>
               <CardDescription>
-                Ranking baseado nas visualizações da página do produto.
+                Produtos com mais visualizações da sua loja.
               </CardDescription>
             </CardHeader>
 
