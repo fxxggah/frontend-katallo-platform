@@ -5,13 +5,13 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   AlertCircle,
+  ArrowRight,
   BarChart3,
   CheckCircle2,
   Copy,
   ExternalLink,
   Eye,
   Loader2,
-  MessageCircle,
   MousePointerClick,
   Package,
   Plus,
@@ -177,32 +177,26 @@ export default function AdminStoreDashboardPage() {
     const actions: QuickAction[] = [
       {
         title: "Novo produto",
-        description: "Cadastre um item na vitrine.",
+        description: "Adicionar item na vitrine",
         href: `/admin/${store.slug}/products/new`,
         icon: <Plus className="h-5 w-5" />,
         primary: true,
       },
       {
         title: "Produtos",
-        description: "Editar preços, fotos e destaques.",
+        description: "Preços, fotos e destaques",
         href: `/admin/${store.slug}/products`,
         icon: <Package className="h-5 w-5" />,
       },
       {
         title: "Categorias",
-        description: "Organizar a navegação da loja.",
+        description: "Organizar catálogo",
         href: `/admin/${store.slug}/categories`,
         icon: <Tags className="h-5 w-5" />,
       },
       {
-        title: "Equipe",
-        description: "Ver membros com acesso.",
-        href: `/admin/${store.slug}/users`,
-        icon: <Users className="h-5 w-5" />,
-      },
-      {
         title: "Analytics",
-        description: "Ver desempenho da loja.",
+        description: "Desempenho da loja",
         href: `/admin/${store.slug}/analytics`,
         icon: <BarChart3 className="h-5 w-5" />,
       },
@@ -211,7 +205,7 @@ export default function AdminStoreDashboardPage() {
     if (role === "OWNER") {
       actions.push({
         title: "Configurações",
-        description: "Editar dados da loja.",
+        description: "Dados da loja",
         href: `/admin/${store.slug}/settings`,
         icon: <Settings className="h-5 w-5" />,
       });
@@ -261,17 +255,20 @@ export default function AdminStoreDashboardPage() {
 
   const hasRecentProducts = recentProducts.length > 0;
   const hasTopProducts = topProducts.length > 0;
+  const whatsappClicks = analytics?.whatsappClicks ?? 0;
+  const storeViews = analytics?.storeViews ?? 0;
+  const productViews = analytics?.productViews ?? 0;
 
   return (
     <div className="space-y-8">
-      <header className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+      <header className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
+        <div className="grid gap-6 p-6 md:p-8 lg:grid-cols-[1fr_340px]">
           <div className="flex items-start gap-4">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
               <Store className="h-7 w-7" />
             </div>
 
-            <div className="space-y-2">
+            <div className="min-w-0 space-y-3">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-3xl font-black tracking-tight text-slate-900">
                   {store.name}
@@ -293,9 +290,9 @@ export default function AdminStoreDashboardPage() {
                 </span>
               </div>
 
-              <p className="max-w-2xl text-sm text-slate-500">
-                Gerencie produtos, categorias, equipe e desempenho da sua
-                vitrine digital.
+              <p className="max-w-2xl text-sm leading-relaxed text-slate-500">
+                Painel operacional para gerenciar catálogo, equipe e desempenho
+                da vitrine.
               </p>
 
               <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
@@ -306,134 +303,158 @@ export default function AdminStoreDashboardPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button
-              onClick={handleCopyStoreLink}
-              variant="outline"
-              className="h-12 rounded-xl border-slate-200 bg-white"
-            >
-              {isCopied ? (
-                <>
-                  <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-600" />
-                  Link copiado
-                </>
-              ) : (
-                <>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copiar link
-                </>
-              )}
-            </Button>
+          <div className="flex flex-col justify-between gap-4 rounded-3xl bg-slate-50 p-4">
+            <div>
+              <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Loja pública
+              </p>
+              <p className="mt-1 truncate text-sm font-bold text-slate-700">
+                {publicStoreUrl || "Link indisponível"}
+              </p>
+            </div>
 
-            <Button
-              asChild
-              variant="outline"
-              className="h-12 rounded-xl border-slate-200 bg-white"
-            >
-              <Link href={`/${store.slug}`} target="_blank">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Ver loja
-              </Link>
-            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Button
+                onClick={handleCopyStoreLink}
+                variant="outline"
+                className="h-11 rounded-xl border-slate-200 bg-white text-xs font-bold"
+              >
+                {isCopied ? (
+                  <>
+                    <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-600" />
+                    Copiado
+                  </>
+                ) : (
+                  <>
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copiar
+                  </>
+                )}
+              </Button>
 
-            <Button
-              asChild
-              className="h-12 rounded-xl bg-slate-900 px-6 font-bold"
-            >
-              <Link href={`/admin/${store.slug}/products/new`}>
-                <Plus className="mr-2 h-4 w-4" />
-                Novo produto
-              </Link>
-            </Button>
+              <Button
+                asChild
+                variant="outline"
+                className="h-11 rounded-xl border-slate-200 bg-white text-xs font-bold"
+              >
+                <Link href={`/${store.slug}`} target="_blank">
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Ver loja
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard
-          icon={<Package className="h-6 w-6" />}
+          icon={<Package className="h-5 w-5" />}
           iconClassName="bg-blue-50 text-blue-600"
           value={stats.totalProducts}
           label="Produtos"
+          helper="Itens cadastrados"
         />
 
         <MetricCard
-          icon={<Star className="h-6 w-6" />}
+          icon={<Star className="h-5 w-5" />}
           iconClassName="bg-amber-50 text-amber-600"
           value={stats.featuredProducts}
           label="Destaques"
+          helper="Na página inicial"
         />
 
         <MetricCard
-          icon={<Tags className="h-6 w-6" />}
+          icon={<Tags className="h-5 w-5" />}
           iconClassName="bg-violet-50 text-violet-600"
           value={stats.totalCategories}
           label="Categorias"
+          helper="Organização da loja"
         />
 
         <MetricCard
-          icon={<Users className="h-6 w-6" />}
+          icon={<Users className="h-5 w-5" />}
           iconClassName="bg-emerald-50 text-emerald-600"
           value={stats.totalMembers}
           label="Equipe"
+          helper="Membros com acesso"
         />
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          icon={<Eye className="h-6 w-6" />}
-          iconClassName="bg-indigo-50 text-indigo-600"
-          value={analytics?.storeViews ?? 0}
-          label="Visitas da loja"
-        />
-
-        <MetricCard
-          icon={<BarChart3 className="h-6 w-6" />}
-          iconClassName="bg-sky-50 text-sky-600"
-          value={analytics?.productViews ?? 0}
-          label="Views de produtos"
-        />
-
-        <MetricCard
-          icon={<MousePointerClick className="h-6 w-6" />}
-          iconClassName="bg-emerald-50 text-emerald-600"
-          value={analytics?.whatsappClicks ?? 0}
-          label="Cliques WhatsApp"
-        />
-
+      <section className="grid gap-6 lg:grid-cols-[1fr_360px]">
         <Card className="rounded-3xl border-slate-100 bg-slate-900 text-white shadow-sm">
-          <CardContent className="flex h-full flex-col justify-between gap-5 p-6">
-            <div>
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
-                <TrendingUp className="h-6 w-6" />
+          <CardContent className="p-6 md:p-7">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                  <BarChart3 className="h-6 w-6" />
+                </div>
+
+                <h2 className="mt-5 text-2xl font-black tracking-tight">
+                  Desempenho da vitrine
+                </h2>
+
+                <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-300">
+                  Acompanhe sinais de interesse dos clientes: visitas,
+                  visualizações de produtos e cliques no WhatsApp.
+                </p>
               </div>
 
-              <p className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400">
-                Produto mais visto
-              </p>
-
-              <p className="mt-1 line-clamp-1 text-lg font-black">
-                {analytics?.mostViewedProductName ?? "Nenhum ainda"}
-              </p>
-
-              <p className="mt-1 text-xs font-bold text-slate-400">
-                {analytics?.mostViewedProductViews ?? 0} visualizações
-              </p>
+              <Button
+                asChild
+                className="h-12 rounded-xl bg-white px-6 font-bold text-slate-900 hover:bg-slate-100"
+              >
+                <Link href={`/admin/${store.slug}/analytics`}>
+                  Ver análise completa
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
 
-            <Button
-              asChild
-              className="w-full rounded-xl bg-white font-bold text-slate-900 hover:bg-slate-100"
-            >
-              <Link href={`/admin/${store.slug}/analytics`}>
-                Ver análise completa
-              </Link>
-            </Button>
+            <div className="mt-7 grid gap-3 sm:grid-cols-3">
+              <AnalyticsMiniCard
+                icon={<Eye className="h-4 w-4" />}
+                label="Visitas"
+                value={storeViews}
+              />
+
+              <AnalyticsMiniCard
+                icon={<BarChart3 className="h-4 w-4" />}
+                label="Views de produtos"
+                value={productViews}
+              />
+
+              <AnalyticsMiniCard
+                icon={<MousePointerClick className="h-4 w-4" />}
+                label="Cliques WhatsApp"
+                value={whatsappClicks}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+              <TrendingUp className="h-6 w-6" />
+            </div>
+
+            <p className="mt-5 text-xs font-black uppercase tracking-widest text-slate-400">
+              Produto mais visto
+            </p>
+
+            <h3 className="mt-2 line-clamp-2 text-xl font-black text-slate-900">
+              {analytics?.mostViewedProductName ?? "Nenhum ainda"}
+            </h3>
+
+            <p className="mt-2 text-sm font-medium text-slate-500">
+              {analytics?.mostViewedProductViews ?? 0} visualizações
+            </p>
           </CardContent>
         </Card>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         {quickActions.map((action) => (
           <Link key={action.href} href={action.href} className="group">
             <Card
@@ -441,9 +462,9 @@ export default function AdminStoreDashboardPage() {
                 action.primary ? "bg-slate-900 text-white" : ""
               }`}
             >
-              <CardContent className="space-y-4 p-6">
+              <CardContent className="p-5">
                 <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                  className={`flex h-11 w-11 items-center justify-center rounded-2xl ${
                     action.primary
                       ? "bg-white/10 text-white"
                       : "bg-slate-50 text-slate-700"
@@ -452,23 +473,21 @@ export default function AdminStoreDashboardPage() {
                   {action.icon}
                 </div>
 
-                <div>
-                  <h3
-                    className={`font-black ${
-                      action.primary ? "text-white" : "text-slate-900"
-                    }`}
-                  >
-                    {action.title}
-                  </h3>
+                <h3
+                  className={`mt-4 font-black ${
+                    action.primary ? "text-white" : "text-slate-900"
+                  }`}
+                >
+                  {action.title}
+                </h3>
 
-                  <p
-                    className={`mt-1 text-sm ${
-                      action.primary ? "text-slate-300" : "text-slate-500"
-                    }`}
-                  >
-                    {action.description}
-                  </p>
-                </div>
+                <p
+                  className={`mt-1 text-sm ${
+                    action.primary ? "text-slate-300" : "text-slate-500"
+                  }`}
+                >
+                  {action.description}
+                </p>
               </CardContent>
             </Card>
           </Link>
@@ -483,7 +502,7 @@ export default function AdminStoreDashboardPage() {
                 Produtos recentes
               </CardTitle>
               <CardDescription>
-                Últimos itens cadastrados ou atualizados na vitrine.
+                Últimos itens cadastrados na vitrine.
               </CardDescription>
             </div>
 
@@ -574,10 +593,10 @@ export default function AdminStoreDashboardPage() {
           <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg font-black text-slate-900">
-                Top 5 mais vistos
+                Produtos mais vistos
               </CardTitle>
               <CardDescription>
-                Produtos com mais visualizações da sua loja.
+                Ranking por visualizações.
               </CardDescription>
             </CardHeader>
 
@@ -623,22 +642,24 @@ export default function AdminStoreDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-3xl border-slate-100 bg-slate-900 text-white shadow-sm">
+          <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
             <CardContent className="space-y-5 p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-700">
                 <Share2 className="h-6 w-6" />
               </div>
 
               <div>
-                <h3 className="text-lg font-black">Compartilhe sua loja</h3>
-                <p className="mt-1 text-sm text-slate-300">
+                <h3 className="text-lg font-black text-slate-900">
+                  Compartilhe sua loja
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
                   Envie o link para clientes pelo WhatsApp, Instagram ou bio.
                 </p>
               </div>
 
               <Button
                 onClick={handleCopyStoreLink}
-                className="w-full rounded-xl bg-white font-bold text-slate-900 hover:bg-slate-100"
+                className="w-full rounded-xl bg-slate-900 font-bold text-white hover:bg-slate-800"
               >
                 {isCopied ? "Link copiado" : "Copiar link da loja"}
               </Button>
@@ -655,28 +676,54 @@ function MetricCard({
   iconClassName,
   value,
   label,
+  helper,
 }: {
   icon: React.ReactNode;
   iconClassName: string;
   value: number;
   label: string;
+  helper: string;
 }) {
   return (
     <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
-      <CardContent className="flex items-center gap-4 p-6">
-        <div
-          className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconClassName}`}
-        >
-          {icon}
-        </div>
+      <CardContent className="p-5">
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-2xl font-black text-slate-900">{value}</p>
+            <p className="mt-1 text-xs font-bold uppercase tracking-widest text-slate-400">
+              {label}
+            </p>
+            <p className="mt-2 text-xs font-medium text-slate-400">{helper}</p>
+          </div>
 
-        <div>
-          <p className="text-2xl font-black text-slate-900">{value}</p>
-          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-            {label}
-          </p>
+          <div
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl ${iconClassName}`}
+          >
+            {icon}
+          </div>
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+function AnalyticsMiniCard({
+  icon,
+  label,
+  value,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+}) {
+  return (
+    <div className="rounded-2xl bg-white/10 p-4">
+      <div className="flex items-center gap-2 text-slate-300">
+        {icon}
+        <p className="text-xs font-bold uppercase tracking-widest">{label}</p>
+      </div>
+
+      <p className="mt-3 text-2xl font-black text-white">{value}</p>
+    </div>
   );
 }
