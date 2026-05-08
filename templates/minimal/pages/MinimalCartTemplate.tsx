@@ -8,6 +8,7 @@ import { MinimalFooter } from "../components/MinimalFooter";
 import { useCartContext } from "@/contexts/CartContext";
 import { formatPrice } from "@/utils/formatPrice";
 import { buildWhatsAppLink } from "@/utils/buildWhatsAppLink";
+import { analyticsService } from "@/services/analyticsService";
 import { CartActionConfirmDialog } from "@/components/cart/CartActionConfirmDialog";
 import { Trash2, Plus, Minus } from "lucide-react";
 
@@ -69,6 +70,12 @@ export function MinimalCartTemplate({ store }: MinimalCartTemplateProps) {
     }
 
     closeConfirmDialog();
+  }
+
+  function handleWhatsappClick() {
+    analyticsService.registerWhatsappClick(store.slug).catch((error) => {
+      console.error("Erro ao registrar clique WhatsApp", error);
+    });
   }
 
   const dialogTitle =
@@ -226,6 +233,7 @@ export function MinimalCartTemplate({ store }: MinimalCartTemplateProps) {
                   href={whatsappLink}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={handleWhatsappClick}
                   className="flex w-full items-center justify-center rounded-2xl bg-green-600 py-5 text-[11px] font-black uppercase tracking-[0.2em] text-white transition-all hover:bg-green-700 hover:shadow-lg hover:shadow-green-200 active:scale-[0.98]"
                 >
                   Finalizar no WhatsApp

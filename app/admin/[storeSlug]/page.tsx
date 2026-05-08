@@ -5,10 +5,14 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
   AlertCircle,
+  BarChart3,
   CheckCircle2,
   Copy,
   ExternalLink,
+  Eye,
   Loader2,
+  MessageCircle,
+  MousePointerClick,
   Package,
   Plus,
   Settings,
@@ -16,6 +20,7 @@ import {
   Star,
   Store,
   Tags,
+  TrendingUp,
   Users,
   XCircle,
 } from "lucide-react";
@@ -24,6 +29,11 @@ import { storeService } from "@/services/storeService";
 import { userService } from "@/services/userService";
 import { productService } from "@/services/productService";
 import { categoryService } from "@/services/categoryService";
+import {
+  analyticsService,
+  type AnalyticsSummaryResponse,
+  type TopProductAnalyticsResponse,
+} from "@/services/analyticsService";
 
 import type {
   CategoryResponse,
@@ -66,6 +76,12 @@ export default function AdminStoreDashboardPage() {
   const [recentProducts, setRecentProducts] = useState<ProductResponse[]>([]);
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [members, setMembers] = useState<StoreUserResponse[]>([]);
+  const [analytics, setAnalytics] =
+    useState<AnalyticsSummaryResponse | null>(null);
+  const [topProducts, setTopProducts] = useState<TopProductAnalyticsResponse[]>(
+    []
+  );
+
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
     featuredProducts: 0,
@@ -93,6 +109,8 @@ export default function AdminStoreDashboardPage() {
         productsPage,
         categoriesData,
         membersData,
+        analyticsData,
+        topProductsData,
       ] = await Promise.all([
         storeService.getStoreBySlug(storeSlug),
         userService.getCurrentStoreUser(storeSlug),
@@ -104,6 +122,8 @@ export default function AdminStoreDashboardPage() {
         }),
         categoryService.getAdminCategories(storeSlug),
         userService.getStoreUsers(storeSlug),
+        analyticsService.getSummary(storeSlug),
+        analyticsService.getTopProducts(storeSlug, 5),
       ]);
 
       const products = productsPage.content ?? [];
@@ -113,6 +133,8 @@ export default function AdminStoreDashboardPage() {
       setRecentProducts(products);
       setCategories(categoriesData);
       setMembers(membersData);
+      setAnalytics(analyticsData);
+      setTopProducts(topProductsData);
 
       setStats({
         totalProducts: productsPage.totalElements ?? products.length,
@@ -178,6 +200,12 @@ export default function AdminStoreDashboardPage() {
         href: `/admin/${store.slug}/users`,
         icon: <Users className="h-5 w-5" />,
       },
+      {
+        title: "Analytics",
+        description: "Ver desempenho da loja.",
+        href: `/admin/${store.slug}/analytics`,
+        icon: <BarChart3 className="h-5 w-5" />,
+      },
     ];
 
     if (role === "OWNER") {
@@ -232,6 +260,7 @@ export default function AdminStoreDashboardPage() {
   }
 
   const hasRecentProducts = recentProducts.length > 0;
+  const hasTopProducts = topProducts.length > 0;
 
   return (
     <div className="space-y-8">
@@ -260,14 +289,13 @@ export default function AdminStoreDashboardPage() {
                   ) : (
                     <XCircle className="h-3 w-3" />
                   )}
-
                   {store.active ? "Online" : "Pausada"}
                 </span>
               </div>
 
               <p className="max-w-2xl text-sm text-slate-500">
-                Gerencie produtos, categorias, destaques e equipe da sua vitrine
-                digital.
+                Gerencie produtos, categorias, equipe e desempenho da sua
+                vitrine digital.
               </p>
 
               <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
@@ -322,76 +350,90 @@ export default function AdminStoreDashboardPage() {
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-              <Package className="h-6 w-6" />
-            </div>
+        <MetricCard
+          icon={<Package className="h-6 w-6" />}
+          iconClassName="bg-blue-50 text-blue-600"
+          value={stats.totalProducts}
+          label="Produtos"
+        />
 
+        <MetricCard
+          icon={<Star className="h-6 w-6" />}
+          iconClassName="bg-amber-50 text-amber-600"
+          value={stats.featuredProducts}
+          label="Destaques"
+        />
+
+        <MetricCard
+          icon={<Tags className="h-6 w-6" />}
+          iconClassName="bg-violet-50 text-violet-600"
+          value={stats.totalCategories}
+          label="Categorias"
+        />
+
+        <MetricCard
+          icon={<Users className="h-6 w-6" />}
+          iconClassName="bg-emerald-50 text-emerald-600"
+          value={stats.totalMembers}
+          label="Equipe"
+        />
+      </section>
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          icon={<Eye className="h-6 w-6" />}
+          iconClassName="bg-indigo-50 text-indigo-600"
+          value={analytics?.storeViews ?? 0}
+          label="Visitas da loja"
+        />
+
+        <MetricCard
+          icon={<BarChart3 className="h-6 w-6" />}
+          iconClassName="bg-sky-50 text-sky-600"
+          value={analytics?.productViews ?? 0}
+          label="Views de produtos"
+        />
+
+        <MetricCard
+          icon={<MousePointerClick className="h-6 w-6" />}
+          iconClassName="bg-emerald-50 text-emerald-600"
+          value={analytics?.whatsappClicks ?? 0}
+          label="Cliques WhatsApp"
+        />
+
+        <Card className="rounded-3xl border-slate-100 bg-slate-900 text-white shadow-sm">
+          <CardContent className="flex h-full flex-col justify-between gap-5 p-6">
             <div>
-              <p className="text-2xl font-black text-slate-900">
-                {stats.totalProducts}
-              </p>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                Produtos
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                <TrendingUp className="h-6 w-6" />
+              </div>
 
-        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
-              <Star className="h-6 w-6" />
-            </div>
-
-            <div>
-              <p className="text-2xl font-black text-slate-900">
-                {stats.featuredProducts}
+              <p className="mt-4 text-xs font-bold uppercase tracking-widest text-slate-400">
+                Produto mais visto
               </p>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                Destaques
-              </p>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
-              <Tags className="h-6 w-6" />
+              <p className="mt-1 line-clamp-1 text-lg font-black">
+                {analytics?.mostViewedProductName ?? "Nenhum ainda"}
+              </p>
+
+              <p className="mt-1 text-xs font-bold text-slate-400">
+                {analytics?.mostViewedProductViews ?? 0} visualizações
+              </p>
             </div>
 
-            <div>
-              <p className="text-2xl font-black text-slate-900">
-                {stats.totalCategories}
-              </p>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                Categorias
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-              <Users className="h-6 w-6" />
-            </div>
-
-            <div>
-              <p className="text-2xl font-black text-slate-900">
-                {stats.totalMembers}
-              </p>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                Equipe
-              </p>
-            </div>
+            <Button
+              asChild
+              className="w-full rounded-xl bg-white font-bold text-slate-900 hover:bg-slate-100"
+            >
+              <Link href={`/admin/${store.slug}/analytics`}>
+                Ver análise completa
+              </Link>
+            </Button>
           </CardContent>
         </Card>
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
         {quickActions.map((action) => (
           <Link key={action.href} href={action.href} className="group">
             <Card
@@ -532,38 +574,52 @@ export default function AdminStoreDashboardPage() {
           <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg font-black text-slate-900">
-                Checklist da loja
+                Produtos mais vistos
               </CardTitle>
               <CardDescription>
-                Itens básicos para deixar a vitrine pronta.
+                Ranking baseado nas visualizações da página do produto.
               </CardDescription>
             </CardHeader>
 
             <CardContent className="space-y-3">
-              <ChecklistItem
-                done={stats.totalProducts > 0}
-                label="Cadastrar pelo menos 1 produto"
-              />
+              {hasTopProducts ? (
+                topProducts.map((product, index) => (
+                  <div
+                    key={product.productId}
+                    className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3"
+                  >
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white text-xs font-black text-slate-500">
+                      {index + 1}
+                    </div>
 
-              <ChecklistItem
-                done={stats.totalCategories > 0}
-                label="Criar categorias"
-              />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-black text-slate-900">
+                        {product.productName}
+                      </p>
+                      <p className="text-xs font-medium text-slate-400">
+                        {product.views} visualizações
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-2xl border border-dashed border-slate-200 p-5 text-center">
+                  <Eye className="mx-auto mb-3 h-8 w-8 text-slate-200" />
+                  <p className="text-sm font-bold text-slate-500">
+                    Nenhuma visualização ainda
+                  </p>
+                </div>
+              )}
 
-              <ChecklistItem
-                done={stats.featuredProducts > 0}
-                label="Marcar produtos como destaque"
-              />
-
-              <ChecklistItem
-                done={Boolean(store.whatsappNumber)}
-                label="Configurar WhatsApp"
-              />
-
-              <ChecklistItem
-                done={Boolean(store.instagram)}
-                label="Adicionar Instagram"
-              />
+              <Button
+                asChild
+                variant="outline"
+                className="mt-2 h-11 w-full rounded-xl border-slate-200 font-bold"
+              >
+                <Link href={`/admin/${store.slug}/analytics`}>
+                  Ver analytics
+                </Link>
+              </Button>
             </CardContent>
           </Card>
 
@@ -594,28 +650,33 @@ export default function AdminStoreDashboardPage() {
   );
 }
 
-function ChecklistItem({ done, label }: { done: boolean; label: string }) {
+function MetricCard({
+  icon,
+  iconClassName,
+  value,
+  label,
+}: {
+  icon: React.ReactNode;
+  iconClassName: string;
+  value: number;
+  label: string;
+}) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3">
-      <div
-        className={`flex h-7 w-7 items-center justify-center rounded-full ${
-          done ? "bg-emerald-500 text-white" : "bg-white text-slate-300"
-        }`}
-      >
-        {done ? (
-          <CheckCircle2 className="h-4 w-4" />
-        ) : (
-          <XCircle className="h-4 w-4" />
-        )}
-      </div>
+    <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+      <CardContent className="flex items-center gap-4 p-6">
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-2xl ${iconClassName}`}
+        >
+          {icon}
+        </div>
 
-      <p
-        className={`text-sm font-bold ${
-          done ? "text-slate-900" : "text-slate-400"
-        }`}
-      >
-        {label}
-      </p>
-    </div>
+        <div>
+          <p className="text-2xl font-black text-slate-900">{value}</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+            {label}
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

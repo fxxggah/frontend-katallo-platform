@@ -12,6 +12,7 @@ import type {
   StoreResponse,
 } from "@/types";
 import { StoreTemplateRenderer } from "@/templates/base/StoreTemplateRenderer";
+import { analyticsService } from "@/services/analyticsService";
 
 export default function StoreHomePage() {
   const params = useParams();
@@ -42,6 +43,7 @@ export default function StoreHomePage() {
           productService.getPublicProducts(storeSlug, { page: 0, size: 12 }),
           productService.getFeaturedProducts(storeSlug),
           productService.getNewArrivals(storeSlug),
+          analyticsService.registerStoreView(storeSlug),
         ]);
 
         setStore(storeData);

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { storeService } from "@/services/storeService";
 import { productService } from "@/services/productService";
+import { analyticsService } from "@/services/analyticsService";
 import { StoreTemplateRenderer } from "@/templates/base/StoreTemplateRenderer";
 import type { ProductResponse, StoreResponse } from "@/types";
 
@@ -32,6 +33,12 @@ export default function ProductPage() {
         setStore(storeData);
         setProduct(productData);
         setRelatedProducts(relatedProductsData);
+
+        analyticsService
+          .registerProductView(storeSlug, productSlug)
+          .catch((error) => {
+            console.error("Erro ao registrar visualização do produto", error);
+          });
       } finally {
         setIsLoading(false);
       }

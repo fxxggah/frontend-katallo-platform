@@ -1,30 +1,47 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import {
+  ArrowUpDown,
+  Edit3,
+  Filter,
+  ImageOff,
   Loader2,
-  Plus,
   MoreVertical,
   Package,
-  Edit3,
-  Trash2,
-  ImageOff,
+  Plus,
+  Search,
   Star,
+  Trash2,
+  X,
 } from "lucide-react";
 
 import { productService } from "@/services/productService";
-import type { ProductResponse, PagedResponse } from "@/types";
+import { categoryService } from "@/services/categoryService";
+import type { CategoryResponse, PagedResponse, ProductResponse } from "@/types";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+
+type SortOption =
+  | "createdAtDesc"
+  | "createdAtAsc"
+  | "updatedAtDesc"
+  | "priceAsc"
+  | "priceDesc"
+  | "nameAsc"
+  | "nameDesc"
+  | "categoryAsc";
 
 export default function ProductsPage() {
   const params = useParams();
@@ -32,13 +49,29 @@ export default function ProductsPage() {
 
   const [productsPage, setProductsPage] =
     useState<PagedResponse<ProductResponse> | null>(null);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [sortOption, setSortOption] = useState<SortOption>("createdAtDesc");
 
   async function load() {
     try {
       setIsLoading(true);
-      const data = await productService.getAdminProducts(storeSlug);
-      setProductsPage(data);
+
+      const [productsData, categoriesData] = await Promise.all([
+        productService.getAdminProducts(storeSlug, {
+          page: 0,
+          size: 100,
+        }),
+        categoryService.getAdminCategories(storeSlug),
+      ]);
+
+      setProductsPage(productsData);
+      setCategories(categoriesData);
+    } catch {
+      toast.error("Erro ao carregar produtos.");
     } finally {
       setIsLoading(false);
     }
@@ -55,177 +88,403 @@ export default function ProductsPage() {
 
     try {
       await productService.deleteProduct(storeSlug, productId);
+      toast.success("Produto excluído com sucesso.");
       load();
-    } catch (error) {
-      alert("Erro ao excluir produto.");
+    } catch {
+      toast.error("Erro ao excluir produto.");
     }
   }
 
+  function getCategoryName(categoryId: number) {
+    return (
+      categories.find((category) => category.id === categoryId)?.name ??
+      "Sem categoria"
+    );
+  }
+
+  function getProductUpdatedAt(product: ProductResponse) {
+    const productWithUpdatedAt = product as ProductResponse & {
+      updatedAt?: string;
+    };
+
+    return productWithUpdatedAt.updatedAt ?? product.createdAt;
+  }
+
+  function handleClearFilters() {
+    setSearch("");
+    setCategoryFilter("all");
+    setSortOption("createdAtDesc");
+  }
+
   useEffect(() => {
-    if (storeSlug) load();
+    if (storeSlug) {
+      load();
+    }
   }, [storeSlug]);
+
+  const products = productsPage?.content ?? [];
+
+  const filteredProducts = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    const filtered = products.filter((product) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        product.name.toLowerCase().includes(normalizedSearch);
+
+      const matchesCategory =
+        categoryFilter === "all" ||
+        product.categoryId === Number(categoryFilter);
+
+      return matchesSearch && matchesCategory;
+    });
+
+    return [...filtered].sort((a, b) => {
+      switch (sortOption) {
+        case "createdAtDesc":
+          return (
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          );
+
+        case "createdAtAsc":
+          return (
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          );
+
+        case "updatedAtDesc":
+          return (
+            new Date(getProductUpdatedAt(b)).getTime() -
+            new Date(getProductUpdatedAt(a)).getTime()
+          );
+
+        case "priceAsc":
+          return Number(a.price) - Number(b.price);
+
+        case "priceDesc":
+          return Number(b.price) - Number(a.price);
+
+        case "nameAsc":
+          return a.name.localeCompare(b.name, "pt-BR");
+
+        case "nameDesc":
+          return b.name.localeCompare(a.name, "pt-BR");
+
+        case "categoryAsc":
+          return getCategoryName(a.categoryId).localeCompare(
+            getCategoryName(b.categoryId),
+            "pt-BR"
+          );
+
+        default:
+          return 0;
+      }
+    });
+  }, [products, search, categoryFilter, sortOption, categories]);
+
+  const featuredCount = products.filter((product) => product.featured).length;
+  const hasActiveFilters =
+    search.trim() || categoryFilter !== "all" || sortOption !== "createdAtDesc";
 
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-indigo-600" />
+        <Loader2 className="h-10 w-10 animate-spin text-slate-900" />
         <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-          Sincronizando estoque...
+          Carregando produtos...
         </p>
       </div>
     );
   }
 
-  const products = productsPage?.content ?? [];
-
   return (
-    <div className="max-w-7xl mx-auto space-y-8 px-4 py-6 md:px-6">
-      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-        <div className="space-y-4">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-playfair font-black text-slate-900">
-              Produtos
-            </h1>
-            <p className="text-sm text-slate-500 italic">
-              Gerencie sua vitrine e disponibilidade de estoque.
-            </p>
-          </div>
-        </div>
+    <div className="space-y-8">
+      <header className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
+              <Package className="h-7 w-7" />
+            </div>
 
-        <Button
-          asChild
-          className="rounded-xl h-12 px-6 bg-slate-900 shadow-lg shadow-slate-200 hover:scale-105 transition-all"
-        >
-          <Link href={`/admin/${storeSlug}/products/new`}>
-            <Plus className="mr-2 h-4 w-4" />
-            Novo Produto
-          </Link>
-        </Button>
-      </div>
+            <div>
+              <h1 className="text-3xl font-black tracking-tight text-slate-900">
+                Produtos
+              </h1>
 
-      {products.length > 0 ? (
-        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((product) => (
-            <Card
-              key={product.id}
-              className="group overflow-hidden border-none bg-white shadow-sm transition-all hover:shadow-xl hover:shadow-slate-200/50 rounded-[2rem]"
-            >
-              <div className="relative aspect-square overflow-hidden bg-slate-50">
-                {product.images?.[0]?.imageUrl ? (
-                  <img
-                    src={product.images[0].imageUrl}
-                    alt={product.name}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="flex h-full w-full flex-col items-center justify-center text-slate-300">
-                    <ImageOff size={40} strokeWidth={1} />
-                    <span className="mt-2 text-[10px] font-bold uppercase tracking-tighter">
-                      Sem imagem
-                    </span>
-                  </div>
-                )}
+              <p className="mt-1 max-w-2xl text-sm text-slate-500">
+                Gerencie produtos, preços, imagens e destaques da vitrine.
+              </p>
 
-                {product.featured && (
-                  <div className="absolute left-4 top-4 flex items-center gap-1 rounded-xl bg-amber-400 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-950 shadow-sm">
-                    <Star size={12} fill="currentColor" />
-                    Destaque
-                  </div>
-                )}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                  {products.length} produto{products.length === 1 ? "" : "s"}
+                </span>
 
-                <div className="absolute bottom-4 left-4 rounded-xl bg-white/90 backdrop-blur-md px-3 py-1.5 shadow-sm border border-white">
-                  <p className="text-xs font-black text-slate-900">
-                    R${" "}
-                    {Number(product.price).toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                    })}
-                  </p>
-                </div>
-
-                <div className="absolute right-4 top-4">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="secondary"
-                        size="icon"
-                        className="h-8 w-8 rounded-full bg-white/80 backdrop-blur-md hover:bg-white shadow-sm"
-                      >
-                        <MoreVertical size={16} className="text-slate-600" />
-                      </Button>
-                    </DropdownMenuTrigger>
-
-                    <DropdownMenuContent
-                      align="end"
-                      className="rounded-xl border-slate-100 p-2 shadow-xl"
-                    >
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href={`/admin/${storeSlug}/products/${product.id}/edit`}
-                          className="flex cursor-pointer items-center gap-2 rounded-lg py-2 text-slate-700 focus:bg-indigo-50 focus:text-indigo-600"
-                        >
-                          <Edit3 size={14} /> Editar
-                        </Link>
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem
-                        onClick={() => handleDelete(product.id)}
-                        className="flex cursor-pointer items-center gap-2 rounded-lg py-2 text-rose-600 focus:bg-rose-50 focus:text-rose-700"
-                      >
-                        <Trash2 size={14} /> Excluir
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
+                <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700">
+                  <Star size={12} />
+                  {featuredCount} destaque{featuredCount === 1 ? "" : "s"}
+                </span>
               </div>
-
-              <CardContent className="p-6">
-                <div className="space-y-2">
-                  <h2 className="line-clamp-1 font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
-                    {product.name}
-                  </h2>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                        Em estoque
-                      </p>
-                    </div>
-
-                    {product.featured && (
-                      <p className="rounded-full bg-amber-50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700">
-                        Destaque
-                      </p>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-[3rem] border-2 border-dashed border-slate-100 bg-white p-12 text-center">
-          <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-slate-50 text-slate-300">
-            <Package size={40} />
+            </div>
           </div>
-
-          <h3 className="mt-6 text-xl font-bold text-slate-900">
-            Sua vitrine está vazia
-          </h3>
-
-          <p className="mt-2 max-w-xs text-sm text-slate-500">
-            Comece cadastrando seu primeiro produto para que ele apareça no seu
-            catálogo público.
-          </p>
 
           <Button
             asChild
-            className="mt-8 rounded-xl bg-indigo-600 hover:bg-indigo-700"
+            className="h-12 rounded-xl bg-slate-900 px-6 font-bold"
           >
             <Link href={`/admin/${storeSlug}/products/new`}>
-              <Plus className="mr-2 h-4 w-4" /> Cadastrar meu primeiro produto
+              <Plus className="mr-2 h-4 w-4" />
+              Novo produto
             </Link>
           </Button>
+        </div>
+      </header>
+
+      <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+        <CardContent className="space-y-4 p-4 md:p-5">
+          <div className="grid gap-4 lg:grid-cols-[1fr_220px_260px_auto]">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Pesquisar produto pelo nome..."
+                className="h-13 rounded-2xl border-slate-200 bg-slate-50/60 pl-11"
+              />
+            </div>
+
+            <div className="relative">
+              <Filter className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="h-13 w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50/60 px-11 text-sm font-bold text-slate-700 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-slate-900"
+              >
+                <option value="all">Todas as categorias</option>
+
+                {categories.map((category) => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="relative">
+              <ArrowUpDown className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value as SortOption)}
+                className="h-13 w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50/60 px-11 text-sm font-bold text-slate-700 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-slate-900"
+              >
+                <option value="createdAtDesc">Mais recentes</option>
+                <option value="createdAtAsc">Mais antigos</option>
+                <option value="updatedAtDesc">Atualizados recentemente</option>
+                <option value="priceAsc">Menor preço</option>
+                <option value="priceDesc">Maior preço</option>
+                <option value="nameAsc">A-Z</option>
+                <option value="nameDesc">Z-A</option>
+                <option value="categoryAsc">Categoria A-Z</option>
+              </select>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClearFilters}
+              disabled={!hasActiveFilters}
+              className="h-13 rounded-2xl border-slate-200 font-bold"
+            >
+              <X className="mr-2 h-4 w-4" />
+              Limpar
+            </Button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
+            <span>
+              Exibindo {filteredProducts.length} de {products.length} produto
+              {products.length === 1 ? "" : "s"}
+            </span>
+
+            {categoryFilter !== "all" && (
+              <span className="rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-600">
+                {getCategoryName(Number(categoryFilter))}
+              </span>
+            )}
+
+            {search.trim() && (
+              <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
+                Busca: {search.trim()}
+              </span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {filteredProducts.length > 0 ? (
+        <section className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {filteredProducts.map((product) => {
+            const image = product.images?.[0]?.imageUrl;
+            const categoryName = getCategoryName(product.categoryId);
+
+            return (
+              <Card
+                key={product.id}
+                className="overflow-hidden rounded-3xl border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+              >
+                <div className="relative aspect-square overflow-hidden bg-slate-100">
+                  {image ? (
+                    <img
+                      src={image.replace(
+                        "/upload/",
+                        "/upload/w_500,q_auto,f_auto/"
+                      )}
+                      alt={product.name}
+                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full flex-col items-center justify-center text-slate-300">
+                      <ImageOff size={40} strokeWidth={1.5} />
+                      <span className="mt-2 text-[10px] font-black uppercase tracking-widest">
+                        Sem imagem
+                      </span>
+                    </div>
+                  )}
+
+                  {product.featured && (
+                    <div className="absolute left-4 top-4 flex items-center gap-1 rounded-xl bg-amber-400 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-950 shadow-sm">
+                      <Star size={12} fill="currentColor" />
+                      Destaque
+                    </div>
+                  )}
+
+                  <div className="absolute bottom-4 left-4 rounded-xl border border-white bg-white/90 px-3 py-1.5 shadow-sm backdrop-blur-md">
+                    <p className="text-xs font-black text-slate-900">
+                      {Number(product.price).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                    </p>
+                  </div>
+
+                  <div className="absolute right-4 top-4">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="secondary"
+                          size="icon"
+                          className="h-9 w-9 rounded-xl bg-white/90 shadow-sm backdrop-blur-md hover:bg-white"
+                        >
+                          <MoreVertical size={16} />
+                        </Button>
+                      </DropdownMenuTrigger>
+
+                      <DropdownMenuContent
+                        align="end"
+                        className="rounded-xl border-slate-100 p-2 shadow-xl"
+                      >
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/admin/${storeSlug}/products/${product.id}/edit`}
+                            className="flex cursor-pointer items-center gap-2 rounded-lg py-2 text-slate-700 focus:bg-indigo-50 focus:text-indigo-600"
+                          >
+                            <Edit3 size={14} />
+                            Editar
+                          </Link>
+                        </DropdownMenuItem>
+
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(product.id)}
+                          className="flex cursor-pointer items-center gap-2 rounded-lg py-2 text-rose-600 focus:bg-rose-50 focus:text-rose-700"
+                        >
+                          <Trash2 size={14} />
+                          Excluir
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+
+                <CardContent className="space-y-3 p-5">
+                  <div>
+                    <h2 className="line-clamp-1 font-black text-slate-900">
+                      {product.name}
+                    </h2>
+
+                    <p className="mt-1 text-xs font-medium text-slate-400">
+                      /{product.slug}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-indigo-700">
+                      {categoryName}
+                    </span>
+
+                    <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">
+                      Visível
+                    </span>
+
+                    {product.featured && (
+                      <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700">
+                        Destaque
+                      </span>
+                    )}
+                  </div>
+
+                  <Button
+                    asChild
+                    variant="outline"
+                    className="h-11 w-full rounded-xl border-slate-200 font-bold"
+                  >
+                    <Link
+                      href={`/admin/${storeSlug}/products/${product.id}/edit`}
+                    >
+                      Editar produto
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </section>
+      ) : (
+        <div className="flex min-h-[40vh] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+          <Package className="mb-4 h-12 w-12 text-slate-200" />
+
+          <h3 className="text-xl font-black text-slate-900">
+            {products.length === 0
+              ? "Nenhum produto cadastrado"
+              : "Nenhum produto encontrado"}
+          </h3>
+
+          <p className="mt-2 max-w-md text-sm text-slate-500">
+            {products.length === 0
+              ? "Comece cadastrando o primeiro produto da sua vitrine."
+              : "Tente ajustar os filtros ou limpar a pesquisa."}
+          </p>
+
+          {products.length === 0 ? (
+            <Button
+              asChild
+              className="mt-8 h-12 rounded-xl bg-slate-900 px-6 font-bold"
+            >
+              <Link href={`/admin/${storeSlug}/products/new`}>
+                <Plus className="mr-2 h-4 w-4" />
+                Criar primeiro produto
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              onClick={handleClearFilters}
+              className="mt-8 h-12 rounded-xl bg-slate-900 px-6 font-bold"
+            >
+              <X className="mr-2 h-4 w-4" />
+              Limpar filtros
+            </Button>
+          )}
         </div>
       )}
     </div>
