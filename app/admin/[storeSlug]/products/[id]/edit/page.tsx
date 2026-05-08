@@ -10,6 +10,7 @@ import {
   X,
   Sparkles,
   FileText,
+  Star,
 } from "lucide-react";
 
 import { productService } from "@/services/productService";
@@ -38,6 +39,7 @@ export default function EditProductPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
+  const [featured, setFeatured] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -49,6 +51,7 @@ export default function EditProductPage() {
       setName(data.name);
       setDescription(data.description ?? "");
       setPrice(String(data.price));
+      setFeatured(data.featured ?? false);
     } catch (error) {
       console.error("Erro ao carregar produto", error);
     }
@@ -72,6 +75,7 @@ export default function EditProductPage() {
         price: Number(price),
         categoryId: product.categoryId,
         visible: product.visible,
+        featured,
       });
 
       router.push(`/admin/${storeSlug}/products`);
@@ -234,6 +238,49 @@ export default function EditProductPage() {
                   className="h-14 rounded-2xl border-slate-100 bg-slate-50/50 focus:bg-white text-lg transition-all"
                 />
               </div>
+
+              <button
+                type="button"
+                onClick={() => setFeatured((current) => !current)}
+                className={`flex items-center justify-between rounded-2xl border p-5 text-left transition-all ${
+                  featured
+                    ? "border-amber-200 bg-amber-50"
+                    : "border-slate-100 bg-slate-50/50 hover:bg-white"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${
+                      featured
+                        ? "bg-amber-500 text-white"
+                        : "bg-white text-slate-400"
+                    }`}
+                  >
+                    <Star size={20} />
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-black text-slate-900">
+                      Produto em destaque
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      Exibir este produto na seção de destaques da loja.
+                    </p>
+                  </div>
+                </div>
+
+                <div
+                  className={`h-6 w-11 rounded-full p-1 transition-all ${
+                    featured ? "bg-amber-500" : "bg-slate-200"
+                  }`}
+                >
+                  <div
+                    className={`h-4 w-4 rounded-full bg-white transition-all ${
+                      featured ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </div>
+              </button>
             </div>
 
             <div className="flex gap-3 pt-4">

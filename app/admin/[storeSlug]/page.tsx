@@ -6,27 +6,32 @@ import { useParams } from "next/navigation";
 import {
   AlertCircle,
   CheckCircle2,
+  Copy,
   ExternalLink,
-  Instagram,
-  LayoutTemplate,
   Loader2,
-  Mail,
-  MapPin,
-  MessageCircle,
   Package,
-  Palette,
+  Plus,
+  Settings,
+  Share2,
+  Star,
   Store,
   Tags,
   Users,
   XCircle,
-  Globe,
-  CalendarDays,
-  Sparkles,
 } from "lucide-react";
 
 import { storeService } from "@/services/storeService";
 import { userService } from "@/services/userService";
-import type { StoreResponse, StoreUserRole } from "@/types";
+import { productService } from "@/services/productService";
+import { categoryService } from "@/services/categoryService";
+
+import type {
+  CategoryResponse,
+  ProductResponse,
+  StoreResponse,
+  StoreUserResponse,
+  StoreUserRole,
+} from "@/types";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -37,12 +42,19 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+type DashboardStats = {
+  totalProducts: number;
+  featuredProducts: number;
+  totalCategories: number;
+  totalMembers: number;
+};
+
 type QuickAction = {
   title: string;
   description: string;
   href: string;
   icon: React.ReactNode;
-  color: string;
+  primary?: boolean;
 };
 
 export default function AdminStoreDashboardPage() {
@@ -51,26 +63,69 @@ export default function AdminStoreDashboardPage() {
 
   const [store, setStore] = useState<StoreResponse | null>(null);
   const [role, setRole] = useState<StoreUserRole | null>(null);
+  const [recentProducts, setRecentProducts] = useState<ProductResponse[]>([]);
+  const [categories, setCategories] = useState<CategoryResponse[]>([]);
+  const [members, setMembers] = useState<StoreUserResponse[]>([]);
+  const [stats, setStats] = useState<DashboardStats>({
+    totalProducts: 0,
+    featuredProducts: 0,
+    totalCategories: 0,
+    totalMembers: 0,
+  });
+
   const [isLoading, setIsLoading] = useState(true);
+  const [isCopied, setIsCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function loadStore() {
+  const publicStoreUrl =
+    typeof window !== "undefined" && store
+      ? `${window.location.origin}/${store.slug}`
+      : "";
+
+  async function loadDashboard() {
     try {
       setIsLoading(true);
       setError(null);
 
-      const [storeData, currentUserData] = await Promise.all([
+      const [
+        storeData,
+        currentUserData,
+        productsPage,
+        categoriesData,
+        membersData,
+      ] = await Promise.all([
         storeService.getStoreBySlug(storeSlug),
         userService.getCurrentStoreUser(storeSlug),
+        productService.getAdminProducts(storeSlug, {
+          page: 0,
+          size: 6,
+          sortField: "createdAt",
+          sortOrder: "desc",
+        }),
+        categoryService.getAdminCategories(storeSlug),
+        userService.getStoreUsers(storeSlug),
       ]);
+
+      const products = productsPage.content ?? [];
 
       setStore(storeData);
       setRole(currentUserData.role);
+      setRecentProducts(products);
+      setCategories(categoriesData);
+      setMembers(membersData);
+
+      setStats({
+        totalProducts: productsPage.totalElements ?? products.length,
+        featuredProducts: products.filter((product) => product.featured).length,
+        totalCategories: categoriesData.length,
+        totalMembers: membersData.length,
+      });
     } catch (err) {
       const message =
         err instanceof Error
           ? err.message
           : "Erro ao carregar os dados da loja.";
+
       setError(message);
     } finally {
       setIsLoading(false);
@@ -78,83 +133,71 @@ export default function AdminStoreDashboardPage() {
   }
 
   useEffect(() => {
-    if (storeSlug) loadStore();
+    if (storeSlug) {
+      loadDashboard();
+    }
   }, [storeSlug]);
 
-  const addressText = useMemo(() => {
-    if (!store) return "";
+  async function handleCopyStoreLink() {
+    if (!publicStoreUrl) return;
 
-    return [store.street, store.number, store.city, store.state, store.country]
-      .filter(Boolean)
-      .join(", ");
-  }, [store]);
+    await navigator.clipboard.writeText(publicStoreUrl);
+    setIsCopied(true);
+
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 1800);
+  }
 
   const quickActions: QuickAction[] = useMemo(() => {
     if (!store) return [];
 
     const actions: QuickAction[] = [
       {
+        title: "Novo produto",
+        description: "Cadastre um item na vitrine.",
+        href: `/admin/${store.slug}/products/new`,
+        icon: <Plus className="h-5 w-5" />,
+        primary: true,
+      },
+      {
         title: "Produtos",
-        description: "Gestão de estoque e vitrine.",
+        description: "Editar preços, fotos e destaques.",
         href: `/admin/${store.slug}/products`,
         icon: <Package className="h-5 w-5" />,
-        color: "bg-blue-50 text-blue-600",
       },
       {
         title: "Categorias",
-        description: "Organize a navegação.",
+        description: "Organizar a navegação da loja.",
         href: `/admin/${store.slug}/categories`,
         icon: <Tags className="h-5 w-5" />,
-        color: "bg-purple-50 text-purple-600",
       },
       {
         title: "Equipe",
-        description: "Acessos administrativos.",
+        description: "Ver membros com acesso.",
         href: `/admin/${store.slug}/users`,
         icon: <Users className="h-5 w-5" />,
-        color: "bg-amber-50 text-amber-600",
       },
     ];
 
     if (role === "OWNER") {
-      actions.push(
-        {
-          title: "Convites",
-          description: "Colaboradores pendentes.",
-          href: `/admin/${store.slug}/invites`,
-          icon: <Mail className="h-5 w-5" />,
-          color: "bg-rose-50 text-rose-600",
-        },
-        {
-          title: "Aparência",
-          description: "Branding e Templates.",
-          href: `/admin/${store.slug}/settings`,
-          icon: <Palette className="h-5 w-5" />,
-          color: "bg-indigo-50 text-indigo-600",
-        }
-      );
+      actions.push({
+        title: "Configurações",
+        description: "Editar dados da loja.",
+        href: `/admin/${store.slug}/settings`,
+        icon: <Settings className="h-5 w-5" />,
+      });
     }
-
-    actions.push({
-      title: "Ver Vitrine",
-      description: "Visualizar como cliente.",
-      href: `/${store.slug}`,
-      icon: <ExternalLink className="h-5 w-5" />,
-      color: "bg-emerald-50 text-emerald-600",
-    });
 
     return actions;
   }, [store, role]);
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6">
-        <div className="relative">
-          <Loader2 className="h-12 w-12 animate-spin text-indigo-600" />
-          <Store className="absolute inset-0 m-auto h-5 w-5 text-slate-400" />
-        </div>
-        <p className="animate-pulse text-sm font-bold uppercase tracking-widest text-slate-500">
-          Preparando seu ecossistema...
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
+        <Loader2 className="h-10 w-10 animate-spin text-slate-900" />
+        <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+          Carregando painel da loja...
         </p>
       </div>
     );
@@ -162,296 +205,417 @@ export default function AdminStoreDashboardPage() {
 
   if (error || !store) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-12">
-        <Card className="overflow-hidden rounded-[2rem] border-red-100 bg-white p-8 text-center shadow-2xl shadow-red-500/5">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-            <AlertCircle className="h-8 w-8" />
-          </div>
+      <div className="mx-auto max-w-2xl py-12">
+        <Card className="rounded-3xl border-red-100 bg-white shadow-sm">
+          <CardHeader className="text-center">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+              <AlertCircle className="h-7 w-7" />
+            </div>
 
-          <CardTitle className="mb-2 text-3xl font-black text-slate-900">
-            Ops! Falha na conexão
-          </CardTitle>
+            <CardTitle className="text-2xl font-black text-slate-900">
+              Não foi possível carregar o painel
+            </CardTitle>
 
-          <CardDescription className="mb-8 text-slate-500">
-            {error ?? "Não encontramos essa unidade no banco de dados."}
-          </CardDescription>
+            <CardDescription>
+              {error ?? "Loja não encontrada ou indisponível."}
+            </CardDescription>
+          </CardHeader>
 
-          <div className="flex flex-col justify-center gap-3 sm:flex-row">
-            <Button
-              onClick={loadStore}
-              className="h-12 rounded-xl bg-slate-900 px-8"
-            >
+          <CardContent className="flex justify-center">
+            <Button onClick={loadDashboard} className="rounded-xl bg-slate-900">
               Tentar novamente
             </Button>
-
-            <Button
-              variant="outline"
-              asChild
-              className="h-12 rounded-xl border-slate-200 px-8"
-            >
-              <Link href="/admin/stores">Voltar para Dashboard</Link>
-            </Button>
-          </div>
+          </CardContent>
         </Card>
       </div>
     );
   }
 
+  const hasRecentProducts = recentProducts.length > 0;
+
   return (
-    <div className="mx-auto max-w-7xl space-y-10 px-4 py-8 md:px-6">
-      <header className="relative flex flex-col gap-6 overflow-hidden rounded-[2.5rem] border border-slate-100 bg-white p-8 shadow-[0_20px_50px_rgba(0,0,0,0.02)] lg:flex-row lg:items-center lg:justify-between">
-        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-indigo-50/50 blur-3xl" />
+    <div className="space-y-8">
+      <header className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
+              <Store className="h-7 w-7" />
+            </div>
 
-        <div className="relative z-10 flex items-center gap-5">
-          <div className="flex h-16 w-16 shrink-0 rotate-2 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-2xl shadow-slate-200">
-            <Store className="h-8 w-8" />
-          </div>
+            <div className="space-y-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-3xl font-black tracking-tight text-slate-900">
+                  {store.name}
+                </h1>
 
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-slate-900 md:text-4xl">
-              {store.name}
-            </h1>
+                <span
+                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${
+                    store.active
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-red-50 text-red-700"
+                  }`}
+                >
+                  {store.active ? (
+                    <CheckCircle2 className="h-3 w-3" />
+                  ) : (
+                    <XCircle className="h-3 w-3" />
+                  )}
 
-            <div className="mt-1 flex items-center gap-2 text-sm font-bold tracking-tight text-indigo-600">
-              <Globe size={14} />
-              katallo.com.br/{store.slug}
+                  {store.active ? "Online" : "Pausada"}
+                </span>
+              </div>
+
+              <p className="max-w-2xl text-sm text-slate-500">
+                Gerencie produtos, categorias, destaques e equipe da sua vitrine
+                digital.
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-slate-400">
+                <span>/{store.slug}</span>
+                <span>•</span>
+                <span>{role === "OWNER" ? "Proprietário" : "Administrador"}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="relative z-10 flex flex-wrap gap-3">
-          <Button
-            asChild
-            className="h-12 rounded-xl bg-slate-900 px-6 transition-transform hover:scale-105"
-          >
-            <Link href={`/admin/${store.slug}/products`}>
-              <Package className="mr-2 h-4 w-4" />
-              Gestão de Produtos
-            </Link>
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Button
+              onClick={handleCopyStoreLink}
+              variant="outline"
+              className="h-12 rounded-xl border-slate-200 bg-white"
+            >
+              {isCopied ? (
+                <>
+                  <CheckCircle2 className="mr-2 h-4 w-4 text-emerald-600" />
+                  Link copiado
+                </>
+              ) : (
+                <>
+                  <Copy className="mr-2 h-4 w-4" />
+                  Copiar link
+                </>
+              )}
+            </Button>
 
-          <Button
-            variant="outline"
-            asChild
-            className="h-12 rounded-xl border-slate-200 bg-white/50 px-6 backdrop-blur-sm"
-          >
-            <Link href={`/${store.slug}`} target="_blank">
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Ver Catálogo
-            </Link>
-          </Button>
+            <Button
+              asChild
+              variant="outline"
+              className="h-12 rounded-xl border-slate-200 bg-white"
+            >
+              <Link href={`/${store.slug}`} target="_blank">
+                <ExternalLink className="mr-2 h-4 w-4" />
+                Ver loja
+              </Link>
+            </Button>
+
+            <Button
+              asChild
+              className="h-12 rounded-xl bg-slate-900 px-6 font-bold"
+            >
+              <Link href={`/admin/${store.slug}/products/new`}>
+                <Plus className="mr-2 h-4 w-4" />
+                Novo produto
+              </Link>
+            </Button>
+          </div>
         </div>
       </header>
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="group rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-indigo-500/5">
-          <div className="flex items-center gap-4">
-            <div
-              className={`flex h-12 w-12 items-center justify-center rounded-xl ${
-                store.active
-                  ? "bg-emerald-50 text-emerald-600"
-                  : "bg-rose-50 text-rose-600"
-              }`}
-            >
-              {store.active ? <CheckCircle2 /> : <XCircle />}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <Package className="h-6 w-6" />
             </div>
 
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                Disponibilidade
+              <p className="text-2xl font-black text-slate-900">
+                {stats.totalProducts}
               </p>
-              <p className="text-lg font-bold text-slate-900">
-                {store.active ? "Loja Online" : "Manutenção"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="group rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-indigo-500/5">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-              <LayoutTemplate />
-            </div>
-
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                Design System
-              </p>
-              <p className="truncate text-lg font-bold text-slate-900">
-                {store.template || "Standard"}
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                Produtos
               </p>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="group rounded-[2rem] border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl hover:shadow-indigo-500/5 sm:col-span-2 lg:col-span-1">
-          <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-slate-500">
-              <CalendarDays />
+        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
+              <Star className="h-6 w-6" />
             </div>
 
             <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
-                Membro desde
+              <p className="text-2xl font-black text-slate-900">
+                {stats.featuredProducts}
               </p>
-              <p className="text-lg font-bold text-slate-900">
-                {new Date(store.createdAt).toLocaleDateString("pt-BR", {
-                  month: "long",
-                  year: "numeric",
-                })}
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                Destaques
               </p>
             </div>
-          </div>
-        </div>
-      </div>
+          </CardContent>
+        </Card>
 
-      <section className="space-y-6">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-1 rounded-full bg-indigo-600" />
-          <h2 className="text-xs font-black uppercase tracking-widest text-slate-900">
-            Ações Operacionais
-          </h2>
-        </div>
+        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-50 text-violet-600">
+              <Tags className="h-6 w-6" />
+            </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-          {quickActions.map((action) => (
-            <Link key={action.href} href={action.href} className="group">
-              <Card className="h-full rounded-[1.8rem] border-slate-100 bg-white transition-all duration-300 group-hover:border-indigo-200 group-hover:shadow-2xl group-hover:shadow-indigo-500/10">
-                <CardContent className="flex flex-col gap-4 p-6">
-                  <div
-                    className={`flex h-12 w-12 items-center justify-center rounded-2xl transition-transform group-hover:-rotate-3 group-hover:scale-110 ${action.color}`}
-                  >
-                    {action.icon}
-                  </div>
+            <div>
+              <p className="text-2xl font-black text-slate-900">
+                {stats.totalCategories}
+              </p>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                Categorias
+              </p>
+            </div>
+          </CardContent>
+        </Card>
 
-                  <div>
-                    <h3 className="text-sm font-bold text-slate-900 transition-colors group-hover:text-indigo-600">
-                      {action.title}
-                    </h3>
-                    <p className="mt-1 text-xs leading-tight text-slate-500">
-                      {action.description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
+        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+              <Users className="h-6 w-6" />
+            </div>
+
+            <div>
+              <p className="text-2xl font-black text-slate-900">
+                {stats.totalMembers}
+              </p>
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                Equipe
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </section>
 
-      <div className="grid gap-8 lg:grid-cols-2 xl:grid-cols-[1fr_400px]">
-        <Card className="overflow-hidden rounded-[2.5rem] border-slate-100 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-50 p-8">
-            <div className="flex items-center gap-3">
-              <Sparkles className="h-5 w-5 text-indigo-600" />
-              <CardTitle className="text-xl font-black">
-                Identidade & Contato
+      <section className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {quickActions.map((action) => (
+          <Link key={action.href} href={action.href} className="group">
+            <Card
+              className={`h-full rounded-3xl border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md ${
+                action.primary ? "bg-slate-900 text-white" : ""
+              }`}
+            >
+              <CardContent className="space-y-4 p-6">
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-2xl ${
+                    action.primary
+                      ? "bg-white/10 text-white"
+                      : "bg-slate-50 text-slate-700"
+                  }`}
+                >
+                  {action.icon}
+                </div>
+
+                <div>
+                  <h3
+                    className={`font-black ${
+                      action.primary ? "text-white" : "text-slate-900"
+                    }`}
+                  >
+                    {action.title}
+                  </h3>
+
+                  <p
+                    className={`mt-1 text-sm ${
+                      action.primary ? "text-slate-300" : "text-slate-500"
+                    }`}
+                  >
+                    {action.description}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        ))}
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-[1fr_380px]">
+        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100">
+            <div>
+              <CardTitle className="text-xl font-black text-slate-900">
+                Produtos recentes
               </CardTitle>
+              <CardDescription>
+                Últimos itens cadastrados ou atualizados na vitrine.
+              </CardDescription>
             </div>
+
+            <Button asChild variant="outline" className="rounded-xl">
+              <Link href={`/admin/${store.slug}/products`}>Ver todos</Link>
+            </Button>
           </CardHeader>
 
-          <CardContent className="grid gap-6 p-8 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-5">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                WhatsApp Business
-              </p>
-              <div className="flex items-center gap-3 font-bold text-slate-900">
-                <MessageCircle className="h-5 w-5 text-emerald-500" />
-                {store.whatsappNumber || "Não configurado"}
-              </div>
-            </div>
+          <CardContent className="p-0">
+            {hasRecentProducts ? (
+              <div className="divide-y divide-slate-100">
+                {recentProducts.map((product) => {
+                  const image = product.images?.[0]?.imageUrl;
 
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-5">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                Instagram
-              </p>
-              <div className="flex items-center gap-3 font-bold text-slate-900">
-                <Instagram className="h-5 w-5 text-rose-500" />
-                {store.instagram ? `@${store.instagram}` : "Não configurado"}
-              </div>
-            </div>
-
-            <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-5 sm:col-span-2">
-              <p className="mb-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                Cores da Vitrine
-              </p>
-
-              <div className="flex flex-wrap gap-6">
-                {[
-                  { label: "Primária", color: store.primaryColor || "#000000" },
-                  {
-                    label: "Secundária",
-                    color: store.secondaryColor || "#666",
-                  },
-                  { label: "Terciária", color: store.tertiaryColor || "#DDD" },
-                ].map((c) => (
-                  <div key={c.label} className="flex items-center gap-3">
+                  return (
                     <div
-                      className="h-10 w-10 rounded-xl border-4 border-white shadow-lg"
-                      style={{ backgroundColor: c.color }}
-                    />
-                    <span className="text-xs font-bold uppercase tracking-tighter text-slate-600">
-                      {c.label}
-                    </span>
-                  </div>
-                ))}
+                      key={product.id}
+                      className="flex items-center gap-4 p-5 transition-colors hover:bg-slate-50"
+                    >
+                      <div className="h-14 w-14 overflow-hidden rounded-2xl bg-slate-100">
+                        {image ? (
+                          <img
+                            src={image}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center">
+                            <Package className="h-5 w-5 text-slate-300" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="truncate font-bold text-slate-900">
+                            {product.name}
+                          </p>
+
+                          {product.featured && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700">
+                              <Star className="h-3 w-3" />
+                              Destaque
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-sm font-medium text-slate-500">
+                          R${" "}
+                          {Number(product.price).toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </p>
+                      </div>
+
+                      <Button asChild variant="ghost" className="rounded-xl">
+                        <Link
+                          href={`/admin/${store.slug}/products/${product.id}/edit`}
+                        >
+                          Editar
+                        </Link>
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center p-12 text-center">
+                <Package className="mb-4 h-10 w-10 text-slate-200" />
+                <p className="font-bold text-slate-900">
+                  Nenhum produto cadastrado
+                </p>
+                <p className="mt-1 text-sm text-slate-500">
+                  Comece adicionando o primeiro produto da loja.
+                </p>
+
+                <Button asChild className="mt-6 rounded-xl bg-slate-900">
+                  <Link href={`/admin/${store.slug}/products/new`}>
+                    Criar produto
+                  </Link>
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
-        <Card className="flex flex-col overflow-hidden rounded-[2.5rem] border-slate-100 bg-white shadow-sm">
-          <CardHeader className="border-b border-slate-50 p-8">
-            <div className="flex items-center gap-3">
-              <MapPin className="h-5 w-5 text-indigo-600" />
-              <CardTitle className="text-xl font-black">
-                Presença Física
+        <aside className="space-y-6">
+          <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-black text-slate-900">
+                Checklist da loja
               </CardTitle>
-            </div>
-          </CardHeader>
+              <CardDescription>
+                Itens básicos para deixar a vitrine pronta.
+              </CardDescription>
+            </CardHeader>
 
-          <CardContent className="flex-1 space-y-6 p-8">
-            <div className="rounded-2xl border border-slate-100 p-5">
-              <p className="mb-3 text-[10px] font-black uppercase tracking-widest text-slate-400">
-                Endereço de Entrega/Retirada
-              </p>
-              <p className="text-sm font-bold italic leading-relaxed text-slate-900">
-                {addressText || "Operação 100% Digital"}
-              </p>
+            <CardContent className="space-y-3">
+              <ChecklistItem
+                done={stats.totalProducts > 0}
+                label="Cadastrar pelo menos 1 produto"
+              />
 
-              {store.googleMapsLink && (
-                <Button
-                  variant="link"
-                  asChild
-                  className="mt-3 h-auto p-0 font-bold text-indigo-600"
-                >
-                  <a href={store.googleMapsLink} target="_blank">
-                    Ver no Google Maps →
-                  </a>
-                </Button>
-              )}
-            </div>
+              <ChecklistItem
+                done={stats.totalCategories > 0}
+                label="Criar categorias"
+              />
 
-            <div className="rounded-3xl bg-indigo-600 p-6 text-white shadow-xl shadow-indigo-100">
-              <h4 className="mb-2 font-bold">Dica de Crescimento</h4>
-              <p className="mb-4 text-xs leading-relaxed text-indigo-100">
-                Lojas com categorias bem definidas vendem até 40% mais. Comece
-                organizando seus produtos agora.
-              </p>
+              <ChecklistItem
+                done={stats.featuredProducts > 0}
+                label="Marcar produtos como destaque"
+              />
+
+              <ChecklistItem
+                done={Boolean(store.whatsappNumber)}
+                label="Configurar WhatsApp"
+              />
+
+              <ChecklistItem
+                done={Boolean(store.instagram)}
+                label="Adicionar Instagram"
+              />
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-3xl border-slate-100 bg-slate-900 text-white shadow-sm">
+            <CardContent className="space-y-5 p-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/10">
+                <Share2 className="h-6 w-6" />
+              </div>
+
+              <div>
+                <h3 className="text-lg font-black">Compartilhe sua loja</h3>
+                <p className="mt-1 text-sm text-slate-300">
+                  Envie o link para clientes pelo WhatsApp, Instagram ou bio.
+                </p>
+              </div>
 
               <Button
-                asChild
-                variant="secondary"
-                className="w-full rounded-xl bg-white font-bold text-indigo-600 hover:bg-indigo-50"
+                onClick={handleCopyStoreLink}
+                className="w-full rounded-xl bg-white font-bold text-slate-900 hover:bg-slate-100"
               >
-                <Link href={`/admin/${store.slug}/categories`}>
-                  Organizar Agora
-                </Link>
+                {isCopied ? "Link copiado" : "Copiar link da loja"}
               </Button>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </aside>
+      </section>
+    </div>
+  );
+}
+
+function ChecklistItem({ done, label }: { done: boolean; label: string }) {
+  return (
+    <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50/60 p-3">
+      <div
+        className={`flex h-7 w-7 items-center justify-center rounded-full ${
+          done ? "bg-emerald-500 text-white" : "bg-white text-slate-300"
+        }`}
+      >
+        {done ? (
+          <CheckCircle2 className="h-4 w-4" />
+        ) : (
+          <XCircle className="h-4 w-4" />
+        )}
       </div>
+
+      <p
+        className={`text-sm font-bold ${
+          done ? "text-slate-900" : "text-slate-400"
+        }`}
+      >
+        {label}
+      </p>
     </div>
   );
 }

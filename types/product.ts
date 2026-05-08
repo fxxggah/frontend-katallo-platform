@@ -15,6 +15,7 @@ export type ProductRequest = {
   promotionalPrice?: number
   categoryId: number
   visible?: boolean
+  featured?: boolean
 }
 
 export type ProductResponse = {
@@ -25,21 +26,22 @@ export type ProductResponse = {
   price: number
   promotionalPrice?: number
   visible: boolean
+  featured: boolean
   createdAt: string
   categoryId: number
   images?: ProductImageResponse[]
 }
 
 export type CartItem = {
-  productId: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image?: string;
-  storeSlug: string;
-};
+  productId: number
+  name: string
+  price: number
+  quantity: number
+  image?: string
+  storeSlug: string
+}
 
 export type Cart = {
-  storeSlug: string;
-  items: CartItem[];
-};
+  storeSlug: string
+  items: CartItem[]
+}

@@ -21,6 +21,8 @@ export default function StoreHomePage() {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [productsPage, setProductsPage] =
     useState<PagedResponse<ProductResponse> | null>(null);
+  const [featuredProducts, setFeaturedProducts] = useState<ProductResponse[]>([]);
+  const [newArrivals, setNewArrivals] = useState<ProductResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -28,15 +30,27 @@ export default function StoreHomePage() {
       try {
         setIsLoading(true);
 
-        const [storeData, categoriesData, productsData] = await Promise.all([
+        const [
+          storeData,
+          categoriesData,
+          productsData,
+          featuredProductsData,
+          newArrivalsData,
+        ] = await Promise.all([
           storeService.getStoreBySlug(storeSlug),
           categoryService.getPublicCategories(storeSlug),
           productService.getPublicProducts(storeSlug, { page: 0, size: 12 }),
+          productService.getFeaturedProducts(storeSlug),
+          productService.getNewArrivals(storeSlug),
         ]);
 
         setStore(storeData);
         setCategories(categoriesData);
         setProductsPage(productsData);
+        setFeaturedProducts(featuredProductsData);
+        setNewArrivals(newArrivalsData);
+      } catch (error) {
+        console.error("Erro ao carregar home da loja", error);
       } finally {
         setIsLoading(false);
       }
@@ -48,6 +62,7 @@ export default function StoreHomePage() {
   }, [storeSlug]);
 
   if (isLoading) return <div className="p-6">Carregando...</div>;
+
   if (!store || !productsPage) {
     return <div className="p-6">Loja não encontrada.</div>;
   }
@@ -58,6 +73,8 @@ export default function StoreHomePage() {
       store={store}
       categories={categories}
       productsPage={productsPage}
+      featuredProducts={featuredProducts}
+      newArrivals={newArrivals}
     />
   );
 }

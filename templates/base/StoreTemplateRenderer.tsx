@@ -27,6 +27,8 @@ export function StoreTemplateRenderer(props: StoreTemplateRendererProps) {
           store={props.store}
           categories={props.categories}
           productsPage={props.productsPage}
+          featuredProducts={props.featuredProducts}
+          newArrivals={props.newArrivals}
         />
       );
 

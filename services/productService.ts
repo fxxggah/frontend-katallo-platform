@@ -137,4 +137,25 @@ export const productService = {
       )
     );
   },
+
+  async getFeaturedProducts(
+    storeSlug: string
+  ): Promise<ProductResponse[]> {
+    return unwrap(
+      await api.get<ProductResponse[]>(
+        `/stores/${storeSlug}/products/featured`
+      )
+    );
+  },
+
+  async getNewArrivals(
+    storeSlug: string
+  ): Promise<ProductResponse[]> {
+    return unwrap(
+      await api.get<ProductResponse[]>(
+        `/stores/${storeSlug}/products/new-arrivals`
+      )
+    );
+  },
+
 };

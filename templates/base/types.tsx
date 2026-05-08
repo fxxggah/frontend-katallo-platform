@@ -9,6 +9,8 @@ export type HomeTemplateProps = {
   store: StoreResponse;
   categories: CategoryResponse[];
   productsPage: PagedResponse<ProductResponse>;
+  featuredProducts?: ProductResponse[];
+  newArrivals?: ProductResponse[];
 };
 
 export type CategoryTemplateProps = {

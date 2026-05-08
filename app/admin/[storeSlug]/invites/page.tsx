@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import { 
-  UserPlus, 
-  Copy, 
-  Check, 
-  Trash2, 
-  Mail, 
-  Clock, 
-  Loader2, 
+import {
+  Check,
+  Clock,
+  Copy,
   ExternalLink,
-  ShieldCheck
+  Loader2,
+  Mail,
+  ShieldCheck,
+  Trash2,
+  UserPlus,
 } from "lucide-react";
 
 import { inviteService } from "@/services/inviteService";
@@ -29,12 +29,20 @@ export default function InvitesPage() {
   const [invites, setInvites] = useState<StoreInviteResponse[]>([]);
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingInvites, setIsLoadingInvites] = useState(true);
   const [lastInviteLink, setLastInviteLink] = useState("");
   const [copiedId, setCopiedId] = useState<number | string | null>(null);
 
   async function load() {
-    const data = await inviteService.getStoreInvites(storeSlug);
-    setInvites(data);
+    try {
+      setIsLoadingInvites(true);
+      const data = await inviteService.getStoreInvites(storeSlug);
+      setInvites(data);
+    } catch {
+      toast.error("Erro ao carregar convites.");
+    } finally {
+      setIsLoadingInvites(false);
+    }
   }
 
   async function handleCreate() {
@@ -42,16 +50,20 @@ export default function InvitesPage() {
 
     try {
       setIsLoading(true);
+
       const invite = await inviteService.createInvite(storeSlug, {
         email: email.trim(),
       });
 
       const link = `${window.location.origin}/invite/accept?token=${invite.token}`;
+
       setLastInviteLink(link);
       setEmail("");
+
       await load();
-      toast.success("Convite gerado com sucesso!");
-    } catch (error) {
+
+      toast.success("Convite gerado com sucesso.");
+    } catch {
       toast.error("Erro ao gerar convite.");
     } finally {
       setIsLoading(false);
@@ -60,136 +72,190 @@ export default function InvitesPage() {
 
   async function handleCopyLink(link: string, id: number | string) {
     await navigator.clipboard.writeText(link);
+
     setCopiedId(id);
-    toast.success("Link copiado!");
+    toast.success("Link copiado.");
+
     setTimeout(() => setCopiedId(null), 2000);
   }
 
   async function handleDelete(id: number) {
-    // Substituir por um modal de confirmação do shadcn no futuro
-    if (!confirm("Deseja realmente revogar este acesso?")) return;
+    if (!confirm("Deseja realmente cancelar este convite?")) return;
 
     try {
       await inviteService.cancelInvite(storeSlug, id);
       toast.success("Convite cancelado.");
       load();
-    } catch (error) {
+    } catch {
       toast.error("Erro ao cancelar convite.");
     }
   }
 
   useEffect(() => {
-    if (storeSlug) load();
+    if (storeSlug) {
+      load();
+    }
   }, [storeSlug]);
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 px-4 py-6 md:px-6">
-      
-      {/* Header */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="h-12 w-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600">
-            <UserPlus size={24} />
+    <div className="space-y-8">
+      <header className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+        <div className="flex items-start gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
+            <UserPlus className="h-7 w-7" />
           </div>
+
           <div>
-            <h1 className="text-3xl font-playfair font-black text-slate-900 tracking-tight">Equipe</h1>
-            <p className="text-sm text-slate-500 italic font-medium">Convide colaboradores para gerenciar sua loja.</p>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900">
+              Convites
+            </h1>
+
+            <p className="mt-1 max-w-2xl text-sm text-slate-500">
+              Gere links de convite para novos administradores acessarem o
+              painel da loja.
+            </p>
+
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700">
+              <Clock size={12} />
+              Convites expiram automaticamente
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Seção de Novo Convite */}
-      <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.04)] rounded-[2rem] overflow-hidden bg-white">
-        <CardContent className="p-8 md:p-10">
-          <div className="space-y-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-grow">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <Input
-                  placeholder="E-mail do colaborador"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="h-14 pl-12 rounded-2xl border-slate-100 bg-slate-50/50 focus:bg-white transition-all text-base"
-                />
-              </div>
-              <Button 
-                onClick={handleCreate} 
-                disabled={isLoading || !email}
-                className="h-14 px-8 rounded-2xl bg-slate-900 hover:bg-indigo-600 shadow-xl shadow-slate-200 transition-all active:scale-95 disabled:opacity-50"
-              >
-                {isLoading ? <Loader2 className="animate-spin mr-2" /> : <UserPlus className="mr-2" size={18} />}
-                Gerar Convite
-              </Button>
+      <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+        <CardContent className="space-y-6 p-6 md:p-8">
+          <div className="flex flex-col gap-4 md:flex-row">
+            <div className="relative flex-1">
+              <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+              <Input
+                placeholder="email@exemplo.com"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="h-14 rounded-2xl border-slate-200 bg-slate-50/60 pl-11 text-base"
+              />
             </div>
 
-            {lastInviteLink && (
-              <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-                <div className="rounded-3xl border border-indigo-100 bg-indigo-50/30 p-6 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-600 flex items-center gap-2">
-                      <ExternalLink size={12} /> Link Gerado Recentemente
-                    </span>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleCopyLink(lastInviteLink, 'last')}
-                      className="h-8 text-indigo-600 hover:bg-indigo-100 rounded-lg font-bold text-xs"
-                    >
-                      {copiedId === 'last' ? <Check size={14} className="mr-1" /> : <Copy size={14} className="mr-1" />}
-                      COPIAR
-                    </Button>
-                  </div>
-                  <p className="break-all font-mono text-sm text-slate-600 bg-white/80 p-4 rounded-xl border border-white">
-                    {lastInviteLink}
-                  </p>
-                </div>
-              </div>
-            )}
+            <Button
+              onClick={handleCreate}
+              disabled={isLoading || !email.trim()}
+              className="h-14 rounded-2xl bg-slate-900 px-8 font-bold"
+            >
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <UserPlus className="mr-2 h-4 w-4" />
+              )}
+              Gerar convite
+            </Button>
           </div>
+
+          {lastInviteLink && (
+            <div className="rounded-3xl border border-indigo-100 bg-indigo-50/50 p-5">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-indigo-700">
+                  <ExternalLink size={12} />
+                  Último link gerado
+                </span>
+
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleCopyLink(lastInviteLink, "last")}
+                  className="rounded-xl text-xs font-black text-indigo-700 hover:bg-indigo-100"
+                >
+                  {copiedId === "last" ? (
+                    <Check className="mr-1 h-4 w-4" />
+                  ) : (
+                    <Copy className="mr-1 h-4 w-4" />
+                  )}
+                  Copiar
+                </Button>
+              </div>
+
+              <p className="break-all rounded-2xl border border-white bg-white/80 p-4 font-mono text-sm text-slate-600">
+                {lastInviteLink}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Lista de Convites Ativos */}
-      <div className="space-y-4">
-        <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Convites Pendentes</h2>
-        
-        {invites.length > 0 ? (
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-black uppercase tracking-widest text-slate-400">
+            Convites pendentes
+          </h2>
+
+          <span className="text-xs font-bold text-slate-400">
+            {invites.length} pendente{invites.length === 1 ? "" : "s"}
+          </span>
+        </div>
+
+        {isLoadingInvites ? (
+          <div className="flex justify-center rounded-3xl bg-white p-12">
+            <Loader2 className="h-8 w-8 animate-spin text-slate-300" />
+          </div>
+        ) : invites.length > 0 ? (
           <div className="grid gap-4 md:grid-cols-2">
             {invites.map((invite) => {
-              const inviteLink = invite.token ? `${window.location.origin}/invite/accept?token=${invite.token}` : "";
+              const inviteLink = invite.token
+                ? `${window.location.origin}/invite/accept?token=${invite.token}`
+                : "";
 
               return (
-                <Card key={invite.id} className="group border-none bg-white shadow-sm hover:shadow-md transition-all rounded-[1.5rem] overflow-hidden">
+                <Card
+                  key={invite.id}
+                  className="rounded-3xl border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                >
                   <CardContent className="p-6">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="space-y-1">
-                        <h3 className="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">{invite.email}</h3>
-                        <div className="flex items-center gap-2 text-slate-400">
-                          <Clock size={12} />
-                          <span className="text-[11px] font-medium tracking-tight">
-                            Expira em {new Date(invite.expiresAt).toLocaleDateString()}
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <h3 className="truncate font-black text-slate-900">
+                          {invite.email}
+                        </h3>
+
+                        <div className="mt-2 flex items-center gap-2 text-slate-400">
+                          <Clock size={13} />
+
+                          <span className="text-xs font-medium">
+                            Expira em{" "}
+                            {new Date(invite.expiresAt).toLocaleDateString(
+                              "pt-BR"
+                            )}
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 bg-amber-50 text-amber-600 px-2 py-1 rounded-lg text-[10px] font-black">
-                         PENDENTE
-                      </div>
+
+                      <span className="rounded-full bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700">
+                        Pendente
+                      </span>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="mt-6 flex gap-2">
                       {inviteLink && (
                         <Button
                           variant="secondary"
-                          className="flex-1 h-10 rounded-xl bg-slate-50 text-slate-600 hover:bg-indigo-50 hover:text-indigo-600 border-none font-bold text-xs"
+                          className="h-11 flex-1 rounded-xl bg-slate-100 text-xs font-bold text-slate-600 hover:bg-indigo-50 hover:text-indigo-700"
                           onClick={() => handleCopyLink(inviteLink, invite.id)}
                         >
-                          {copiedId === invite.id ? <Check size={14} /> : <Copy size={14} className="mr-2" />}
-                          {copiedId === invite.id ? "Copiado" : "Copiar Link"}
+                          {copiedId === invite.id ? (
+                            <Check className="mr-2 h-4 w-4" />
+                          ) : (
+                            <Copy className="mr-2 h-4 w-4" />
+                          )}
+
+                          {copiedId === invite.id
+                            ? "Copiado"
+                            : "Copiar link"}
                         </Button>
                       )}
+
                       <Button
                         variant="ghost"
-                        className="h-10 w-10 rounded-xl text-slate-300 hover:text-rose-600 hover:bg-rose-50"
+                        className="h-11 w-11 rounded-xl text-slate-300 hover:bg-rose-50 hover:text-rose-600"
                         onClick={() => handleDelete(invite.id)}
                       >
                         <Trash2 size={18} />
@@ -201,12 +267,18 @@ export default function InvitesPage() {
             })}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-20 bg-slate-50/50 rounded-[3rem] border border-dashed border-slate-100">
-            <ShieldCheck size={48} className="text-slate-200 mb-4" />
-            <p className="text-slate-400 font-medium text-sm italic">Sua equipe ainda está vazia.</p>
+          <div className="flex min-h-[35vh] flex-col items-center justify-center rounded-3xl border-2 border-dashed border-slate-200 bg-white p-12 text-center">
+            <ShieldCheck className="mb-4 h-12 w-12 text-slate-200" />
+            <h3 className="text-xl font-black text-slate-900">
+              Nenhum convite pendente
+            </h3>
+            <p className="mt-2 max-w-md text-sm text-slate-500">
+              Quando você gerar convites, eles aparecerão aqui até serem aceitos
+              ou cancelados.
+            </p>
           </div>
         )}
-      </div>
+      </section>
     </div>
   );
 }

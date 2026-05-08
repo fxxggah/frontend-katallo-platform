@@ -16,15 +16,17 @@ export default function AdminStoreLayout({
 
   const isDashboardPage = pathname === `/admin/${storeSlug}`;
 
-  const backHref = isDashboardPage
-    ? "/admin/stores"
-    : `/admin/${storeSlug}`;
+  const backHref = isDashboardPage ? "/admin/stores" : `/admin/${storeSlug}`;
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 md:px-6">
-      <BackButton href={backHref} />
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
+        <div className="mb-6">
+          <BackButton href={backHref} />
+        </div>
 
-      {children}
+        {children}
+      </div>
     </div>
   );
 }

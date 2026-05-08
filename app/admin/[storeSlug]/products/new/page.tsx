@@ -1,15 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
-  Package,
-  Tag,
+  CheckCircle2,
   DollarSign,
+  FileText,
   Layers,
   Loader2,
-  Sparkles,
-  FileText,
+  Package,
+  Save,
+  Star,
+  Tag,
 } from "lucide-react";
 
 import { productService } from "@/services/productService";
@@ -18,14 +20,8 @@ import type { CategoryResponse } from "@/types";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 
 export default function NewProductPage() {
   const params = useParams();
@@ -36,17 +32,22 @@ export default function NewProductPage() {
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState<number | "">("");
+  const [featured, setFeatured] = useState(false);
 
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     async function loadCategories() {
       try {
+        setIsLoadingCategories(true);
         const data = await categoryService.getAdminCategories(storeSlug);
         setCategories(data);
-      } catch (error) {
-        console.error("Erro ao carregar categorias", error);
+      } catch {
+        toast.error("Erro ao carregar categorias.");
+      } finally {
+        setIsLoadingCategories(false);
       }
     }
 
@@ -56,182 +57,266 @@ export default function NewProductPage() {
   }, [storeSlug]);
 
   async function handleCreate() {
-    if (!name || !price || !categoryId) {
+    if (!name.trim() || !price || !categoryId) {
+      toast.error("Preencha nome, preço e categoria.");
       return;
     }
 
     try {
-      setIsLoading(true);
+      setIsSaving(true);
 
       await productService.createProduct(storeSlug, {
-        name,
-        description,
+        name: name.trim(),
+        description: description.trim(),
         price: Number(price),
         categoryId: Number(categoryId),
         visible: true,
+        featured,
       });
 
+      toast.success("Produto criado com sucesso.");
       router.push(`/admin/${storeSlug}/products`);
-    } catch (error) {
-      console.error("Erro ao criar produto", error);
+    } catch {
+      toast.error("Erro ao criar produto.");
     } finally {
-      setIsLoading(false);
+      setIsSaving(false);
     }
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 px-4 py-8">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
-          <Sparkles size={12} className="text-amber-500" />
-          Novo Item
-        </div>
-      </div>
-
-      <Card className="border-none bg-white shadow-[0_32px_64px_-15px_rgba(0,0,0,0.05)] rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="p-8 md:p-12 border-b border-slate-50">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-xl mb-6">
-            <Package size={24} />
+    <div className="space-y-8">
+      <header className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm md:p-8">
+        <div className="flex items-start gap-4">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-white">
+            <Package className="h-7 w-7" />
           </div>
 
-          <CardTitle className="text-3xl font-playfair font-black text-slate-900">
-            Cadastrar Produto
-          </CardTitle>
+          <div>
+            <h1 className="text-3xl font-black tracking-tight text-slate-900">
+              Novo produto
+            </h1>
 
-          <CardDescription className="text-slate-500 italic text-base">
-            Adicione os detalhes essenciais para exibir seu produto no catálogo.
-          </CardDescription>
-        </CardHeader>
+            <p className="mt-1 max-w-2xl text-sm text-slate-500">
+              Cadastre um novo item para aparecer na vitrine pública da loja.
+              Depois você poderá adicionar imagens e ajustar detalhes.
+            </p>
 
-        <CardContent className="p-8 md:p-12 space-y-8">
-          <div className="grid gap-8">
-            <div className="grid gap-3">
-              <Label
-                htmlFor="name"
-                className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"
-              >
-                <Tag size={14} className="text-indigo-500" />
-                Nome do Produto
-              </Label>
+            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">
+              <CheckCircle2 size={12} />
+              Produto ficará visível ao criar
+            </div>
+          </div>
+        </div>
+      </header>
 
-              <Input
-                id="name"
-                placeholder="Ex: Camiseta Oversized Minimal"
-                className="h-14 rounded-2xl border-slate-100 bg-slate-50/50 focus:bg-white text-lg transition-all"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
+      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+        <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+          <CardHeader className="border-b border-slate-100">
+            <CardTitle className="text-xl font-black text-slate-900">
+              Informações do produto
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent className="space-y-6 p-6 md:p-8">
+            <div className="space-y-2">
+              <label className="text-xs font-black uppercase tracking-widest text-slate-500">
+                Nome do produto
+              </label>
+
+              <div className="relative">
+                <Tag className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+                <Input
+                  placeholder="Ex: Vestido floral azul"
+                  className="h-13 rounded-2xl border-slate-200 bg-slate-50/60 pl-11"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
             </div>
 
-            <div className="grid gap-3">
-              <Label
-                htmlFor="description"
-                className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"
-              >
-                <FileText size={14} className="text-violet-500" />
-                Descrição do Produto
-              </Label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-500">
+                <FileText size={14} />
+                Descrição
+              </label>
 
               <textarea
-                id="description"
-                placeholder="Ex: Produto confortável, moderno e ideal para usar no dia a dia..."
-                className="min-h-32 w-full resize-none rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-3 text-base text-slate-900 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-slate-900"
+                placeholder="Descreva tecido, tamanho, diferenciais, uso indicado..."
+                className="min-h-36 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-slate-900"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
             </div>
 
-            <div className="grid gap-8 md:grid-cols-2">
-              <div className="grid gap-3">
-                <Label
-                  htmlFor="price"
-                  className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"
-                >
-                  <DollarSign size={14} className="text-emerald-500" />
-                  Preço de Venda
-                </Label>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500">
+                  Preço
+                </label>
 
                 <div className="relative">
-                  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
-                    R$
-                  </span>
+                  <DollarSign className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
                   <Input
-                    id="price"
                     type="number"
                     step="0.01"
                     placeholder="0,00"
-                    className="h-14 pl-12 rounded-2xl border-slate-100 bg-slate-50/50 focus:bg-white text-lg transition-all"
+                    className="h-13 rounded-2xl border-slate-200 bg-slate-50/60 pl-11"
                     value={price}
                     onChange={(e) => setPrice(e.target.value)}
-                    required
                   />
                 </div>
               </div>
 
-              <div className="grid gap-3">
-                <Label
-                  htmlFor="category"
-                  className="text-xs font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"
-                >
-                  <Layers size={14} className="text-amber-500" />
+              <div className="space-y-2">
+                <label className="text-xs font-black uppercase tracking-widest text-slate-500">
                   Categoria
-                </Label>
+                </label>
 
                 <div className="relative">
+                  <Layers className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
                   <select
-                    id="category"
-                    className="flex h-14 w-full rounded-2xl border border-slate-100 bg-slate-50/50 px-4 py-2 text-base text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-all appearance-none cursor-pointer"
+                    className="h-13 w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50/60 px-11 text-sm font-medium text-slate-900 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-slate-900"
                     value={categoryId}
                     onChange={(e) =>
                       setCategoryId(
                         e.target.value === "" ? "" : Number(e.target.value)
                       )
                     }
-                    required
+                    disabled={isLoadingCategories}
                   >
-                    <option value="">Selecione...</option>
+                    <option value="">
+                      {isLoadingCategories
+                        ? "Carregando..."
+                        : "Selecione uma categoria"}
+                    </option>
 
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name}
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
                       </option>
                     ))}
                   </select>
-
-                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
-                    <svg className="h-4 w-4 fill-current" viewBox="0 0 20 20">
-                      <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                    </svg>
-                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <div className="pt-6">
-            <Button
-              onClick={handleCreate}
-              disabled={isLoading || !name || !price || !categoryId}
-              className="w-full h-14 rounded-2xl bg-slate-900 text-base font-bold shadow-2xl shadow-slate-200 transition-all hover:scale-[1.01] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
+            <button
+              type="button"
+              onClick={() => setFeatured((current) => !current)}
+              className={`flex w-full items-center justify-between rounded-2xl border p-5 text-left transition-all ${
+                featured
+                  ? "border-amber-200 bg-amber-50"
+                  : "border-slate-200 bg-slate-50/60 hover:bg-white"
+              }`}
             >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <Loader2 className="animate-spin" size={20} />
-                  Processando...
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${
+                    featured
+                      ? "bg-amber-500 text-white"
+                      : "bg-white text-slate-400"
+                  }`}
+                >
+                  <Star size={20} />
                 </div>
-              ) : (
-                "Finalizar e Criar Produto"
-              )}
-            </Button>
 
-            <p className="text-center text-[11px] text-slate-400 mt-4 uppercase tracking-[0.15em] font-medium">
-              O produto ficará visível imediatamente após a criação.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+                <div>
+                  <p className="text-sm font-black text-slate-900">
+                    Produto em destaque
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Exibir este produto na seção de destaques da loja.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className={`h-6 w-11 rounded-full p-1 transition-all ${
+                  featured ? "bg-amber-500" : "bg-slate-200"
+                }`}
+              >
+                <div
+                  className={`h-4 w-4 rounded-full bg-white transition-all ${
+                    featured ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </div>
+            </button>
+
+            <div className="flex justify-end border-t border-slate-100 pt-6">
+              <Button
+                onClick={handleCreate}
+                disabled={isSaving || !name.trim() || !price || !categoryId}
+                className="h-12 rounded-xl bg-slate-900 px-8 font-bold"
+              >
+                {isSaving ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Save className="mr-2 h-4 w-4" />
+                )}
+                {isSaving ? "Criando..." : "Criar produto"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <aside className="space-y-6">
+          <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-black text-slate-900">
+                Resumo
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  Produto
+                </p>
+                <p className="mt-1 font-bold text-slate-900">
+                  {name || "Nome do produto"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  Preço
+                </p>
+                <p className="mt-1 font-bold text-slate-900">
+                  {price
+                    ? Number(price).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })
+                    : "Não definido"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  Status
+                </p>
+                <p className="mt-1 font-bold text-slate-900">
+                  {featured ? "Destaque + visível" : "Visível"}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-3xl border-slate-100 bg-slate-900 text-white shadow-sm">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-black">Próximo passo</h3>
+              <p className="mt-2 text-sm leading-relaxed text-slate-300">
+                Depois de criar o produto, entre na edição para adicionar fotos
+                e deixar a vitrine mais completa.
+              </p>
+            </CardContent>
+          </Card>
+        </aside>
+      </div>
     </div>
   );
 }
