@@ -275,11 +275,10 @@ export default function AdminStoreDashboardPage() {
                 </h1>
 
                 <span
-                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${
-                    store.active
+                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${store.active
                       ? "bg-emerald-50 text-emerald-700"
                       : "bg-red-50 text-red-700"
-                  }`}
+                    }`}
                 >
                   {store.active ? (
                     <CheckCircle2 className="h-3 w-3" />
@@ -458,33 +457,29 @@ export default function AdminStoreDashboardPage() {
         {quickActions.map((action) => (
           <Link key={action.href} href={action.href} className="group">
             <Card
-              className={`h-full rounded-3xl border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md ${
-                action.primary ? "bg-slate-900 text-white" : ""
-              }`}
+              className={`h-full rounded-3xl border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md ${action.primary ? "bg-slate-900 text-white" : ""
+                }`}
             >
               <CardContent className="p-5">
                 <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-2xl ${
-                    action.primary
+                  className={`flex h-11 w-11 items-center justify-center rounded-2xl ${action.primary
                       ? "bg-white/10 text-white"
                       : "bg-slate-50 text-slate-700"
-                  }`}
+                    }`}
                 >
                   {action.icon}
                 </div>
 
                 <h3
-                  className={`mt-4 font-black ${
-                    action.primary ? "text-white" : "text-slate-900"
-                  }`}
+                  className={`mt-4 font-black ${action.primary ? "text-white" : "text-slate-900"
+                    }`}
                 >
                   {action.title}
                 </h3>
 
                 <p
-                  className={`mt-1 text-sm ${
-                    action.primary ? "text-slate-300" : "text-slate-500"
-                  }`}
+                  className={`mt-1 text-sm ${action.primary ? "text-slate-300" : "text-slate-500"
+                    }`}
                 >
                   {action.description}
                 </p>
