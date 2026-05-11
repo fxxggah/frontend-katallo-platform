@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  formatCurrencyInput,
+  currencyStringToNumber,
+} from "@/utils/currency";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -68,7 +72,7 @@ export default function NewProductPage() {
       await productService.createProduct(storeSlug, {
         name: name.trim(),
         description: description.trim(),
-        price: Number(price),
+        price: currencyStringToNumber(price),
         categoryId: Number(categoryId),
         visible: true,
         featured,
@@ -159,12 +163,14 @@ export default function NewProductPage() {
                   <DollarSign className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
                   <Input
-                    type="number"
-                    step="0.01"
+                    type="text"
+                    inputMode="numeric"
                     placeholder="0,00"
                     className="h-13 rounded-2xl border-slate-200 bg-slate-50/60 pl-11"
                     value={price}
-                    onChange={(e) => setPrice(e.target.value)}
+                    onChange={(e) =>
+                      setPrice(formatCurrencyInput(e.target.value))
+                    }
                   />
                 </div>
               </div>
@@ -206,19 +212,17 @@ export default function NewProductPage() {
             <button
               type="button"
               onClick={() => setFeatured((current) => !current)}
-              className={`flex w-full items-center justify-between rounded-2xl border p-5 text-left transition-all ${
-                featured
+              className={`flex w-full items-center justify-between rounded-2xl border p-5 text-left transition-all ${featured
                   ? "border-amber-200 bg-amber-50"
                   : "border-slate-200 bg-slate-50/60 hover:bg-white"
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${
-                    featured
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${featured
                       ? "bg-amber-500 text-white"
                       : "bg-white text-slate-400"
-                  }`}
+                    }`}
                 >
                   <Star size={20} />
                 </div>
@@ -234,14 +238,12 @@ export default function NewProductPage() {
               </div>
 
               <div
-                className={`h-6 w-11 rounded-full p-1 transition-all ${
-                  featured ? "bg-amber-500" : "bg-slate-200"
-                }`}
+                className={`h-6 w-11 rounded-full p-1 transition-all ${featured ? "bg-amber-500" : "bg-slate-200"
+                  }`}
               >
                 <div
-                  className={`h-4 w-4 rounded-full bg-white transition-all ${
-                    featured ? "translate-x-5" : "translate-x-0"
-                  }`}
+                  className={`h-4 w-4 rounded-full bg-white transition-all ${featured ? "translate-x-5" : "translate-x-0"
+                    }`}
                 />
               </div>
             </button>
@@ -288,9 +290,9 @@ export default function NewProductPage() {
                 <p className="mt-1 font-bold text-slate-900">
                   {price
                     ? Number(price).toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })
+                      style: "currency",
+                      currency: "BRL",
+                    })
                     : "Não definido"}
                 </p>
               </div>
