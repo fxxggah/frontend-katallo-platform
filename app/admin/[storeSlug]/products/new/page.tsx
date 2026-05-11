@@ -4,7 +4,7 @@ import {
   formatCurrencyInput,
   currencyStringToNumber,
 } from "@/utils/currency";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   CheckCircle2,
@@ -16,20 +16,27 @@ import {
   Save,
   Star,
   Tag,
+  UploadCloud,
 } from "lucide-react";
 
 import { productService } from "@/services/productService";
 import { categoryService } from "@/services/categoryService";
+import { imageService } from "@/services/imageService";
 import type { CategoryResponse } from "@/types";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
+import {
+  SortableProductImages,
+  type SortableProductImage,
+} from "@/components/admin/SortableProductImages";
 
 export default function NewProductPage() {
   const params = useParams();
   const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const storeSlug = params.storeSlug as string;
 
   const [name, setName] = useState("");
@@ -37,6 +44,7 @@ export default function NewProductPage() {
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState<number | "">("");
   const [featured, setFeatured] = useState(false);
+  const [images, setImages] = useState<SortableProductImage[]>([]);
 
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
@@ -60,6 +68,64 @@ export default function NewProductPage() {
     }
   }, [storeSlug]);
 
+  useEffect(() => {
+    return () => {
+      images.forEach((image) => {
+        if (image.imageUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(image.imageUrl);
+        }
+      });
+    };
+  }, [images]);
+
+  function handleSelectImages(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+
+    if (files.length === 0) return;
+
+    const remainingSlots = 8 - images.length;
+
+    if (remainingSlots <= 0) {
+      toast.error("Você pode adicionar no máximo 8 imagens por produto.");
+      e.target.value = "";
+      return;
+    }
+
+    const selectedFiles = files.slice(0, remainingSlots);
+
+    const newImages: SortableProductImage[] = selectedFiles.map(
+      (file, index) => ({
+        id: `temp-${Date.now()}-${index}`,
+        imageUrl: URL.createObjectURL(file),
+        file,
+        position: images.length + index + 1,
+      })
+    );
+
+    setImages((current) => [...current, ...newImages]);
+
+    if (files.length > remainingSlots) {
+      toast.warning(`Apenas ${remainingSlots} imagem(ns) foram adicionadas.`);
+    }
+
+    e.target.value = "";
+  }
+
+  function handleRemoveImage(imageToRemove: SortableProductImage) {
+    setImages((current) =>
+      current
+        .filter((image) => image.id !== imageToRemove.id)
+        .map((image, index) => ({
+          ...image,
+          position: index + 1,
+        }))
+    );
+
+    if (imageToRemove.imageUrl.startsWith("blob:")) {
+      URL.revokeObjectURL(imageToRemove.imageUrl);
+    }
+  }
+
   async function handleCreate() {
     if (!name.trim() || !price || !categoryId) {
       toast.error("Preencha nome, preço e categoria.");
@@ -69,7 +135,7 @@ export default function NewProductPage() {
     try {
       setIsSaving(true);
 
-      await productService.createProduct(storeSlug, {
+      const createdProduct = await productService.createProduct(storeSlug, {
         name: name.trim(),
         description: description.trim(),
         price: currencyStringToNumber(price),
@@ -78,8 +144,18 @@ export default function NewProductPage() {
         featured,
       });
 
+      for (const image of images) {
+        if (image.file) {
+          await imageService.uploadProductImage(
+            storeSlug,
+            createdProduct.id,
+            image.file
+          );
+        }
+      }
+
       toast.success("Produto criado com sucesso.");
-      router.push(`/admin/${storeSlug}/products`);
+      router.push(`/admin/${storeSlug}/products/${createdProduct.id}/edit`);
     } catch {
       toast.error("Erro ao criar produto.");
     } finally {
@@ -102,7 +178,7 @@ export default function NewProductPage() {
 
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
               Cadastre um novo item para aparecer na vitrine pública da loja.
-              Depois você poderá adicionar imagens e ajustar detalhes.
+              Você também pode adicionar e reorganizar imagens antes de criar.
             </p>
 
             <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">
@@ -113,7 +189,7 @@ export default function NewProductPage() {
         </div>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
           <CardHeader className="border-b border-slate-100">
             <CardTitle className="text-xl font-black text-slate-900">
@@ -269,6 +345,48 @@ export default function NewProductPage() {
           <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
             <CardHeader>
               <CardTitle className="text-lg font-black text-slate-900">
+                Imagens
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-5">
+              <SortableProductImages
+                images={images}
+                onChange={setImages}
+                onRemove={handleRemoveImage}
+              />
+
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={images.length >= 8}
+                className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-slate-500 transition-all hover:border-slate-300 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <UploadCloud className="h-5 w-5" />
+                <span className="text-xs font-black uppercase tracking-widest">
+                  Adicionar imagens
+                </span>
+              </button>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleSelectImages}
+                className="hidden"
+                accept="image/*"
+                multiple
+              />
+
+              <p className="text-xs leading-relaxed text-slate-400">
+                Arraste para reorganizar. A primeira imagem será enviada como
+                principal. Limite: 8 imagens.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-black text-slate-900">
                 Resumo
               </CardTitle>
             </CardHeader>
@@ -289,11 +407,22 @@ export default function NewProductPage() {
                 </p>
                 <p className="mt-1 font-bold text-slate-900">
                   {price
-                    ? Number(price).toLocaleString("pt-BR", {
+                    ? currencyStringToNumber(price).toLocaleString("pt-BR", {
                       style: "currency",
                       currency: "BRL",
                     })
                     : "Não definido"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  Imagens
+                </p>
+                <p className="mt-1 font-bold text-slate-900">
+                  {images.length > 0
+                    ? `${images.length} imagem(ns)`
+                    : "Nenhuma imagem"}
                 </p>
               </div>
 
@@ -305,16 +434,6 @@ export default function NewProductPage() {
                   {featured ? "Destaque + visível" : "Visível"}
                 </p>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-3xl border-slate-100 bg-slate-900 text-white shadow-sm">
-            <CardContent className="p-6">
-              <h3 className="text-lg font-black">Próximo passo</h3>
-              <p className="mt-2 text-sm leading-relaxed text-slate-300">
-                Depois de criar o produto, entre na edição para adicionar fotos
-                e deixar a vitrine mais completa.
-              </p>
             </CardContent>
           </Card>
         </aside>

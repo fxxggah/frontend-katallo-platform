@@ -1,8 +1,8 @@
 "use client";
 
 import {
-  formatCurrencyInput,
   currencyStringToNumber,
+  formatCurrencyInput,
 } from "@/utils/currency";
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -20,14 +20,21 @@ import {
   UploadCloud,
 } from "lucide-react";
 
-import { productService } from "@/services/productService";
 import { imageService } from "@/services/imageService";
+import { productService } from "@/services/productService";
 import type { ProductResponse } from "@/types";
 
-import { Input } from "@/components/ui/input";
+import {
+  SortableProductImages,
+  type SortableProductImage,
+} from "@/components/admin/SortableProductImages";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+
+const MAX_IMAGE_SIZE_MB = 10;
+const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 
 export default function EditProductPage() {
   const params = useParams();
@@ -54,7 +61,15 @@ export default function EditProductPage() {
 
       const data = await productService.getProductById(storeSlug, productId);
 
-      setProduct(data);
+      const sortedImages = [...(data.images ?? [])].sort(
+        (a, b) => (a.position ?? 0) - (b.position ?? 0)
+      );
+
+      setProduct({
+        ...data,
+        images: sortedImages,
+      });
+
       setName(data.name);
       setDescription(data.description ?? "");
       setPrice(
@@ -113,6 +128,12 @@ export default function EditProductPage() {
 
     if (!file) return;
 
+    if (file.size > MAX_IMAGE_SIZE_BYTES) {
+      toast.error(`A imagem deve ter no máximo ${MAX_IMAGE_SIZE_MB}MB.`);
+      e.target.value = "";
+      return;
+    }
+
     try {
       setIsUploading(true);
 
@@ -124,6 +145,47 @@ export default function EditProductPage() {
     } finally {
       setIsUploading(false);
       e.target.value = "";
+    }
+  }
+
+  function handleImagesChange(images: SortableProductImage[]) {
+    if (!product) return;
+
+    setProduct({
+      ...product,
+      images: images.map((image, index) => ({
+        id: Number(image.id),
+        imageUrl: image.imageUrl,
+        position: index + 1,
+      })),
+    });
+  }
+
+  async function handleReorderImages(images: SortableProductImage[]) {
+    try {
+      await imageService.reorderProductImages(storeSlug, productId, {
+        imageIds: images.map((image) => Number(image.id)),
+      });
+
+      toast.success("Ordem das imagens atualizada.");
+    } catch {
+      toast.error("Erro ao reordenar imagens.");
+      await load();
+    }
+  }
+
+  async function handleRemoveImage(image: SortableProductImage) {
+    try {
+      await imageService.deleteProductImage(
+        storeSlug,
+        productId,
+        Number(image.id)
+      );
+
+      toast.success("Imagem removida.");
+      await load();
+    } catch {
+      toast.error("Erro ao remover imagem.");
     }
   }
 
@@ -151,6 +213,12 @@ export default function EditProductPage() {
       </div>
     );
   }
+
+  const images: SortableProductImage[] = (product.images ?? []).map((image) => ({
+    id: image.id,
+    imageUrl: image.imageUrl,
+    position: image.position,
+  }));
 
   const mainImage = product.images?.[0]?.imageUrl;
 
@@ -242,41 +310,30 @@ export default function EditProductPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
-              {product.images?.map((image) => (
-                <div
-                  key={image.id}
-                  className="aspect-square overflow-hidden rounded-2xl border border-slate-100 bg-slate-50"
-                >
-                  <img
-                    src={image.imageUrl.replace(
-                      "/upload/",
-                      "/upload/w_300,q_auto,f_auto/"
-                    )}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              ))}
+            <SortableProductImages
+              images={images}
+              onChange={handleImagesChange}
+              onReorder={handleReorderImages}
+              onRemove={handleRemoveImage}
+            />
 
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
-                className="flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 text-slate-400 transition-all hover:border-slate-300 hover:bg-white disabled:opacity-60"
-              >
-                {isUploading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <>
-                    <UploadCloud className="h-5 w-5" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">
-                      Enviar
-                    </span>
-                  </>
-                )}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-slate-500 transition-all hover:border-slate-300 hover:bg-white disabled:opacity-60"
+            >
+              {isUploading ? (
+                <Loader2 className="h-5 w-5 animate-spin" />
+              ) : (
+                <>
+                  <UploadCloud className="h-5 w-5" />
+                  <span className="text-xs font-black uppercase tracking-widest">
+                    Enviar imagem
+                  </span>
+                </>
+              )}
+            </button>
 
             <input
               type="file"
@@ -287,8 +344,8 @@ export default function EditProductPage() {
             />
 
             <p className="text-xs leading-relaxed text-slate-400">
-              A primeira imagem da lista será usada como imagem principal do
-              produto na vitrine.
+              Arraste as imagens para reorganizar. A primeira imagem será usada
+              como imagem principal do produto na vitrine.
             </p>
           </CardContent>
         </Card>
@@ -355,15 +412,15 @@ export default function EditProductPage() {
               type="button"
               onClick={() => setFeatured((current) => !current)}
               className={`flex w-full items-center justify-between rounded-2xl border p-5 text-left transition-all ${featured
-                ? "border-amber-200 bg-amber-50"
-                : "border-slate-200 bg-slate-50/60 hover:bg-white"
+                  ? "border-amber-200 bg-amber-50"
+                  : "border-slate-200 bg-slate-50/60 hover:bg-white"
                 }`}
             >
               <div className="flex items-center gap-3">
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-xl ${featured
-                    ? "bg-amber-500 text-white"
-                    : "bg-white text-slate-400"
+                      ? "bg-amber-500 text-white"
+                      : "bg-white text-slate-400"
                     }`}
                 >
                   <Star size={20} />
