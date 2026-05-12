@@ -412,15 +412,15 @@ export default function EditProductPage() {
               type="button"
               onClick={() => setFeatured((current) => !current)}
               className={`flex w-full items-center justify-between rounded-2xl border p-5 text-left transition-all ${featured
-                  ? "border-amber-200 bg-amber-50"
-                  : "border-slate-200 bg-slate-50/60 hover:bg-white"
+                ? "border-amber-200 bg-amber-50"
+                : "border-slate-200 bg-slate-50/60 hover:bg-white"
                 }`}
             >
               <div className="flex items-center gap-3">
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-xl ${featured
-                      ? "bg-amber-500 text-white"
-                      : "bg-white text-slate-400"
+                    ? "bg-amber-500 text-white"
+                    : "bg-white text-slate-400"
                     }`}
                 >
                   <Star size={20} />
@@ -437,13 +437,12 @@ export default function EditProductPage() {
               </div>
 
               <div
-                className={`h-6 w-11 rounded-full p-1 transition-all ${featured ? "bg-amber-500" : "bg-slate-200"
+                className={`flex h-6 w-6 items-center justify-center rounded-md border-2 transition-all ${featured
+                    ? "border-amber-500 bg-amber-500 text-white"
+                    : "border-slate-300 bg-white text-transparent"
                   }`}
               >
-                <div
-                  className={`h-4 w-4 rounded-full bg-white transition-all ${featured ? "translate-x-5" : "translate-x-0"
-                    }`}
-                />
+                <CheckCircle2 className="h-4 w-4" />
               </div>
             </button>
 
