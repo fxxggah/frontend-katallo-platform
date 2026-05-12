@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   DndContext,
   DragEndEvent,
@@ -19,6 +20,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical, Trash2 } from "lucide-react";
+
+import { CartActionConfirmDialog } from "@/components/cart/CartActionConfirmDialog";
 
 export type SortableProductImage = {
   id: string | number;
@@ -51,6 +54,8 @@ function SortableImageItem({
   index: number;
   onRemove?: (image: SortableProductImage) => void;
 }) {
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   const {
     attributes,
     listeners,
@@ -67,14 +72,20 @@ function SortableImageItem({
     transition,
   };
 
+  function handleConfirmRemove() {
+    onRemove?.(image);
+    setConfirmOpen(false);
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative aspect-square overflow-hidden rounded-2xl border bg-slate-50 shadow-sm transition-all ${isDragging
-        ? "z-50 scale-105 border-slate-900 opacity-90"
-        : "border-slate-100"
-        }`}
+      className={`relative aspect-square overflow-hidden rounded-2xl border bg-slate-50 shadow-sm transition-all ${
+        isDragging
+          ? "z-50 scale-105 border-slate-900 opacity-90"
+          : "border-slate-100"
+      }`}
     >
       <img
         src={getPreviewUrl(image.imageUrl)}
@@ -99,14 +110,26 @@ function SortableImageItem({
       </button>
 
       {onRemove && (
-        <button
-          type="button"
-          onClick={() => onRemove(image)}
-          className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/95 text-white shadow transition hover:bg-red-600"
-          aria-label="Remover imagem"
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => setConfirmOpen(true)}
+            className="absolute bottom-2 right-2 flex h-9 w-9 items-center justify-center rounded-xl bg-red-500/95 text-white shadow transition hover:bg-red-600"
+            aria-label="Remover imagem"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+
+          <CartActionConfirmDialog
+            open={confirmOpen}
+            title="Remover imagem do produto?"
+            description="Você está prestes a remover esta imagem do produto."
+            confirmLabel="Remover imagem"
+            variant="remove"
+            onClose={() => setConfirmOpen(false)}
+            onConfirm={handleConfirmRemove}
+          />
+        </>
       )}
     </div>
   );
