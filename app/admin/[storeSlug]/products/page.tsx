@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowUpDown,
+  CheckCircle2,
   Edit3,
   Filter,
   ImageOff,
@@ -47,11 +48,13 @@ type StockFilter = "all" | "inStock" | "outOfStock";
 
 export default function ProductsPage() {
   const params = useParams();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const storeSlug = params.storeSlug as string;
 
   const [productsPage, setProductsPage] =
     useState<PagedResponse<ProductResponse> | null>(null);
-
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -59,6 +62,8 @@ export default function ProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [stockFilter, setStockFilter] = useState<StockFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("createdAtDesc");
+
+  const [showUpdatedMessage, setShowUpdatedMessage] = useState(false);
 
   async function load() {
     try {
@@ -121,11 +126,25 @@ export default function ProductsPage() {
     setSortOption("createdAtDesc");
   }
 
+  function handleCloseUpdatedMessage() {
+    setShowUpdatedMessage(false);
+    router.replace(`/admin/${storeSlug}/products`);
+  }
+
   useEffect(() => {
     if (storeSlug) {
       load();
     }
   }, [storeSlug]);
+
+  useEffect(() => {
+    const updated = searchParams.get("updated");
+
+    if (updated === "true") {
+      setShowUpdatedMessage(true);
+      router.replace(`/admin/${storeSlug}/products`);
+    }
+  }, [searchParams, router, storeSlug]);
 
   const products = productsPage?.content ?? [];
 
@@ -268,6 +287,31 @@ export default function ProductsPage() {
         </div>
       </header>
 
+      {showUpdatedMessage && (
+        <div className="flex items-start justify-between gap-4 rounded-3xl border border-emerald-100 bg-emerald-50 p-5 text-emerald-800 shadow-sm">
+          <div className="flex gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+
+            <div>
+              <p className="font-black">Produto atualizado com sucesso</p>
+              <p className="mt-1 text-sm font-medium text-emerald-700">
+                As alterações já foram salvas e aplicadas na vitrine da loja.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCloseUpdatedMessage}
+            className="rounded-xl p-2 text-emerald-700 transition hover:bg-emerald-100"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
         <CardContent className="space-y-4 p-4 md:p-5">
           <div className="grid gap-4 xl:grid-cols-[1fr_220px_220px_260px_auto]">
@@ -329,6 +373,7 @@ export default function ProductsPage() {
                 <option value="priceDesc">Maior preço</option>
                 <option value="nameAsc">A-Z</option>
                 <option value="nameDesc">Z-A</option>
+                <option value="categoryAsc">Categoria A-Z</option>
               </select>
             </div>
 

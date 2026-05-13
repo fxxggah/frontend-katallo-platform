@@ -178,7 +178,7 @@ export default function NewProductPage() {
       }
 
       toast.success("Produto criado com sucesso.");
-      router.push(`/admin/${storeSlug}/products/${createdProduct.id}/edit`);
+      router.push(`/admin/${storeSlug}/products`);
     } catch {
       toast.error("Erro ao criar produto.");
     } finally {
