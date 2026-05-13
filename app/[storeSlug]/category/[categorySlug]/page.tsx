@@ -1,5 +1,6 @@
 "use client";
 
+import { MinimalStoreLoading } from "@/templates/minimal/components/MinimalStoreLoading";
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "next/navigation";
 import { storeService } from "@/services/storeService";
@@ -56,7 +57,7 @@ export default function CategoryPage() {
     [categories, categorySlug]
   );
 
-  if (isLoading) return <div className="p-6">Carregando...</div>;
+  if (isLoading) return <MinimalStoreLoading />;
 
   if (!store || !productsPage) {
     return <div className="p-6">Categoria não encontrada.</div>;

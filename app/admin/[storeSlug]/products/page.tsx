@@ -26,6 +26,7 @@ import type { CategoryResponse, PagedResponse, ProductResponse } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AdminConfirmDialog } from "@/components/admin/AdminConfirmDialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,6 +56,7 @@ export default function ProductsPage() {
 
   const [productsPage, setProductsPage] =
     useState<PagedResponse<ProductResponse> | null>(null);
+
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -64,6 +66,11 @@ export default function ProductsPage() {
   const [sortOption, setSortOption] = useState<SortOption>("createdAtDesc");
 
   const [showUpdatedMessage, setShowUpdatedMessage] = useState(false);
+  const [showCreatedMessage, setShowCreatedMessage] = useState(false);
+
+  const [productToDelete, setProductToDelete] =
+    useState<ProductResponse | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   async function load() {
     try {
@@ -86,21 +93,25 @@ export default function ProductsPage() {
     }
   }
 
-  async function handleDelete(productId: number) {
-    if (
-      !confirm(
-        "Tem certeza que deseja excluir este produto? Esta ação não pode ser desfeita."
-      )
-    ) {
-      return;
-    }
+  function handleDelete(product: ProductResponse) {
+    setProductToDelete(product);
+  }
+
+  async function handleConfirmDelete() {
+    if (!productToDelete) return;
 
     try {
-      await productService.deleteProduct(storeSlug, productId);
+      setIsDeleting(true);
+
+      await productService.deleteProduct(storeSlug, productToDelete.id);
+
       toast.success("Produto excluído com sucesso.");
-      load();
+      setProductToDelete(null);
+      await load();
     } catch {
       toast.error("Erro ao excluir produto.");
+    } finally {
+      setIsDeleting(false);
     }
   }
 
@@ -126,8 +137,9 @@ export default function ProductsPage() {
     setSortOption("createdAtDesc");
   }
 
-  function handleCloseUpdatedMessage() {
+  function handleCloseSuccessMessage() {
     setShowUpdatedMessage(false);
+    setShowCreatedMessage(false);
     router.replace(`/admin/${storeSlug}/products`);
   }
 
@@ -139,9 +151,17 @@ export default function ProductsPage() {
 
   useEffect(() => {
     const updated = searchParams.get("updated");
+    const created = searchParams.get("created");
 
     if (updated === "true") {
       setShowUpdatedMessage(true);
+      setShowCreatedMessage(false);
+      router.replace(`/admin/${storeSlug}/products`);
+    }
+
+    if (created === "true") {
+      setShowCreatedMessage(true);
+      setShowUpdatedMessage(false);
       router.replace(`/admin/${storeSlug}/products`);
     }
   }, [searchParams, router, storeSlug]);
@@ -287,6 +307,31 @@ export default function ProductsPage() {
         </div>
       </header>
 
+      {showCreatedMessage && (
+        <div className="flex items-start justify-between gap-4 rounded-3xl border border-emerald-100 bg-emerald-50 p-5 text-emerald-800 shadow-sm">
+          <div className="flex gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-emerald-500 text-white">
+              <CheckCircle2 className="h-5 w-5" />
+            </div>
+
+            <div>
+              <p className="font-black">Produto criado com sucesso</p>
+              <p className="mt-1 text-sm font-medium text-emerald-700">
+                O produto já foi cadastrado e está disponível na lista da loja.
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleCloseSuccessMessage}
+            className="rounded-xl p-2 text-emerald-700 transition hover:bg-emerald-100"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       {showUpdatedMessage && (
         <div className="flex items-start justify-between gap-4 rounded-3xl border border-emerald-100 bg-emerald-50 p-5 text-emerald-800 shadow-sm">
           <div className="flex gap-3">
@@ -304,7 +349,7 @@ export default function ProductsPage() {
 
           <button
             type="button"
-            onClick={handleCloseUpdatedMessage}
+            onClick={handleCloseSuccessMessage}
             className="rounded-xl p-2 text-emerald-700 transition hover:bg-emerald-100"
           >
             <X className="h-4 w-4" />
@@ -500,7 +545,7 @@ export default function ProductsPage() {
                         </DropdownMenuItem>
 
                         <DropdownMenuItem
-                          onClick={() => handleDelete(product.id)}
+                          onClick={() => handleDelete(product)}
                           className="flex cursor-pointer items-center gap-2 rounded-lg py-2 text-rose-600 focus:bg-rose-50 focus:text-rose-700"
                         >
                           <Trash2 size={14} />
@@ -593,6 +638,25 @@ export default function ProductsPage() {
           )}
         </div>
       )}
+
+      <AdminConfirmDialog
+        open={!!productToDelete}
+        title="Excluir produto?"
+        description={
+          productToDelete
+            ? `Você está prestes a excluir "${productToDelete.name}". Esta ação não pode ser desfeita.`
+            : ""
+        }
+        confirmLabel="Excluir produto"
+        variant="danger"
+        isLoading={isDeleting}
+        onConfirm={handleConfirmDelete}
+        onClose={() => {
+          if (!isDeleting) {
+            setProductToDelete(null);
+          }
+        }}
+      />
     </div>
   );
 }

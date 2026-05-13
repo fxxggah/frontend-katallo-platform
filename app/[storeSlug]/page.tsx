@@ -1,5 +1,6 @@
 "use client";
 
+import { MinimalStoreLoading } from "@/templates/minimal/components/MinimalStoreLoading";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
@@ -74,7 +75,7 @@ export default function StoreHomePage() {
   }, [storeSlug]);
 
   if (isLoading) {
-    return <div className="p-6">Carregando...</div>;
+    return <MinimalStoreLoading />;
   }
 
   if (!store) {
@@ -82,7 +83,7 @@ export default function StoreHomePage() {
   }
 
   if (!productsPage) {
-    return <div className="p-6">Carregando produtos...</div>;
+    return <MinimalStoreLoading />;
   }
 
   return (

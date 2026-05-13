@@ -7,6 +7,7 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
+  Archive,
   CheckCircle2,
   DollarSign,
   FileText,
@@ -17,7 +18,6 @@ import {
   Star,
   Tag,
   UploadCloud,
-  Archive,
 } from "lucide-react";
 
 import { productService } from "@/services/productService";
@@ -177,8 +177,7 @@ export default function NewProductPage() {
         }
       }
 
-      toast.success("Produto criado com sucesso.");
-      router.push(`/admin/${storeSlug}/products`);
+      router.push(`/admin/${storeSlug}/products?created=true`);
     } catch {
       toast.error("Erro ao criar produto.");
     } finally {
@@ -201,9 +200,16 @@ export default function NewProductPage() {
 
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
               Cadastre um novo item para aparecer na vitrine pública da loja.
+              Você também pode adicionar e reorganizar imagens antes de criar.
             </p>
 
-            <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">
+            <div
+              className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${
+                inStock
+                  ? "bg-emerald-50 text-emerald-700"
+                  : "bg-zinc-100 text-zinc-500"
+              }`}
+            >
               <CheckCircle2 size={12} />
               {inStock ? "Produto em estoque ao criar" : "Produto esgotado ao criar"}
             </div>
@@ -449,6 +455,63 @@ export default function NewProductPage() {
                 Arraste para reorganizar. A primeira imagem será enviada como
                 principal. Limite: 8 imagens.
               </p>
+            </CardContent>
+          </Card>
+
+          <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-black text-slate-900">
+                Resumo
+              </CardTitle>
+            </CardHeader>
+
+            <CardContent className="space-y-4">
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  Produto
+                </p>
+                <p className="mt-1 font-bold text-slate-900">
+                  {name || "Nome do produto"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  Preço
+                </p>
+                <p className="mt-1 font-bold text-slate-900">
+                  {price
+                    ? currencyStringToNumber(price).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })
+                    : "Não definido"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  Imagens
+                </p>
+                <p className="mt-1 font-bold text-slate-900">
+                  {images.length > 0
+                    ? `${images.length} imagem(ns)`
+                    : "Nenhuma imagem"}
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
+                  Status
+                </p>
+                <p className="mt-1 font-bold text-slate-900">
+                  {!inStock
+                    ? "Esgotado"
+                    : featured
+                      ? "Em estoque + destaque"
+                      : "Em estoque"}
+                </p>
+              </div>
             </CardContent>
           </Card>
         </aside>
