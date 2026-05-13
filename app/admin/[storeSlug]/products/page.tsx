@@ -43,17 +43,21 @@ type SortOption =
   | "nameDesc"
   | "categoryAsc";
 
+type StockFilter = "all" | "inStock" | "outOfStock";
+
 export default function ProductsPage() {
   const params = useParams();
   const storeSlug = params.storeSlug as string;
 
   const [productsPage, setProductsPage] =
     useState<PagedResponse<ProductResponse> | null>(null);
+
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [stockFilter, setStockFilter] = useState<StockFilter>("all");
   const [sortOption, setSortOption] = useState<SortOption>("createdAtDesc");
 
   async function load() {
@@ -113,6 +117,7 @@ export default function ProductsPage() {
   function handleClearFilters() {
     setSearch("");
     setCategoryFilter("all");
+    setStockFilter("all");
     setSortOption("createdAtDesc");
   }
 
@@ -136,7 +141,12 @@ export default function ProductsPage() {
         categoryFilter === "all" ||
         product.categoryId === Number(categoryFilter);
 
-      return matchesSearch && matchesCategory;
+      const matchesStock =
+        stockFilter === "all" ||
+        (stockFilter === "inStock" && product.inStock) ||
+        (stockFilter === "outOfStock" && !product.inStock);
+
+      return matchesSearch && matchesCategory && matchesStock;
     });
 
     return [...filtered].sort((a, b) => {
@@ -179,11 +189,20 @@ export default function ProductsPage() {
           return 0;
       }
     });
-  }, [products, search, categoryFilter, sortOption, categories]);
+  }, [products, search, categoryFilter, stockFilter, sortOption, categories]);
 
-  const featuredCount = products.filter((product) => product.featured).length;
+  const featuredCount = products.filter(
+    (product) => product.featured && product.inStock
+  ).length;
+
+  const inStockCount = products.filter((product) => product.inStock).length;
+  const outOfStockCount = products.filter((product) => !product.inStock).length;
+
   const hasActiveFilters =
-    search.trim() || categoryFilter !== "all" || sortOption !== "createdAtDesc";
+    search.trim() ||
+    categoryFilter !== "all" ||
+    stockFilter !== "all" ||
+    sortOption !== "createdAtDesc";
 
   if (isLoading) {
     return (
@@ -211,12 +230,22 @@ export default function ProductsPage() {
               </h1>
 
               <p className="mt-1 max-w-2xl text-sm text-slate-500">
-                Gerencie produtos, preços, imagens e destaques da vitrine.
+                Gerencie produtos, preços, imagens, estoque e destaques da
+                vitrine.
               </p>
 
               <div className="mt-3 flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
                   {products.length} produto{products.length === 1 ? "" : "s"}
+                </span>
+
+                <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">
+                  {inStockCount} em estoque
+                </span>
+
+                <span className="inline-flex items-center gap-2 rounded-full bg-zinc-100 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                  {outOfStockCount} esgotado
+                  {outOfStockCount === 1 ? "" : "s"}
                 </span>
 
                 <span className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700">
@@ -241,7 +270,7 @@ export default function ProductsPage() {
 
       <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
         <CardContent className="space-y-4 p-4 md:p-5">
-          <div className="grid gap-4 lg:grid-cols-[1fr_220px_260px_auto]">
+          <div className="grid gap-4 xl:grid-cols-[1fr_220px_220px_260px_auto]">
             <div className="relative">
               <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
@@ -272,6 +301,20 @@ export default function ProductsPage() {
             </div>
 
             <div className="relative">
+              <Package className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+
+              <select
+                value={stockFilter}
+                onChange={(e) => setStockFilter(e.target.value as StockFilter)}
+                className="h-13 w-full appearance-none rounded-2xl border border-slate-200 bg-slate-50/60 px-11 text-sm font-bold text-slate-700 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-slate-900"
+              >
+                <option value="all">Todos os estoques</option>
+                <option value="inStock">Em estoque</option>
+                <option value="outOfStock">Esgotados</option>
+              </select>
+            </div>
+
+            <div className="relative">
               <ArrowUpDown className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 
               <select
@@ -286,7 +329,6 @@ export default function ProductsPage() {
                 <option value="priceDesc">Maior preço</option>
                 <option value="nameAsc">A-Z</option>
                 <option value="nameDesc">Z-A</option>
-                <option value="categoryAsc">Categoria A-Z</option>
               </select>
             </div>
 
@@ -314,6 +356,12 @@ export default function ProductsPage() {
               </span>
             )}
 
+            {stockFilter !== "all" && (
+              <span className="rounded-full bg-zinc-100 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                {stockFilter === "inStock" ? "Em estoque" : "Esgotados"}
+              </span>
+            )}
+
             {search.trim() && (
               <span className="rounded-full bg-slate-100 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-slate-500">
                 Busca: {search.trim()}
@@ -328,11 +376,14 @@ export default function ProductsPage() {
           {filteredProducts.map((product) => {
             const image = product.images?.[0]?.imageUrl;
             const categoryName = getCategoryName(product.categoryId);
+            const isOutOfStock = !product.inStock;
 
             return (
               <Card
                 key={product.id}
-                className="overflow-hidden rounded-3xl border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                className={`overflow-hidden rounded-3xl border-slate-100 bg-white shadow-sm transition-all hover:-translate-y-1 hover:shadow-md ${
+                  isOutOfStock ? "opacity-80" : ""
+                }`}
               >
                 <div className="relative aspect-square overflow-hidden bg-slate-100">
                   {image ? (
@@ -342,7 +393,9 @@ export default function ProductsPage() {
                         "/upload/w_500,q_auto,f_auto/"
                       )}
                       alt={product.name}
-                      className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
+                      className={`h-full w-full object-cover transition-transform duration-500 hover:scale-105 ${
+                        isOutOfStock ? "grayscale" : ""
+                      }`}
                     />
                   ) : (
                     <div className="flex h-full w-full flex-col items-center justify-center text-slate-300">
@@ -353,7 +406,13 @@ export default function ProductsPage() {
                     </div>
                   )}
 
-                  {product.featured && (
+                  {isOutOfStock && (
+                    <div className="absolute left-4 top-4 rounded-xl bg-zinc-900 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-white shadow-sm">
+                      Esgotado
+                    </div>
+                  )}
+
+                  {product.featured && product.inStock && (
                     <div className="absolute left-4 top-4 flex items-center gap-1 rounded-xl bg-amber-400 px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-amber-950 shadow-sm">
                       <Star size={12} fill="currentColor" />
                       Destaque
@@ -423,11 +482,13 @@ export default function ProductsPage() {
                       {categoryName}
                     </span>
 
-                    <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">
-                      Visível
-                    </span>
+                    {isOutOfStock && (
+                      <span className="rounded-full bg-zinc-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                        Esgotado
+                      </span>
+                    )}
 
-                    {product.featured && (
+                    {product.featured && product.inStock && (
                       <span className="rounded-full bg-amber-50 px-2.5 py-1 text-[10px] font-black uppercase tracking-widest text-amber-700">
                         Destaque
                       </span>

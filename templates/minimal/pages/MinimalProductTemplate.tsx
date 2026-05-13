@@ -26,6 +26,7 @@ export function MinimalProductTemplate({
   const { items, addToCart, removeFromCart } = useCartContext();
 
   const images = product.images ?? [];
+  const isOutOfStock = !product.inStock;
 
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [pendingCartAction, setPendingCartAction] =
@@ -42,6 +43,8 @@ export function MinimalProductTemplate({
     : null;
 
   function openCartConfirmation() {
+    if (isOutOfStock) return;
+
     setPendingCartAction(isProductInCart ? "remove" : "add");
   }
 
@@ -50,6 +53,11 @@ export function MinimalProductTemplate({
   }
 
   function handleConfirmCartAction() {
+    if (isOutOfStock) {
+      closeCartConfirmation();
+      return;
+    }
+
     if (pendingCartAction === "add") {
       addToCart(product, 1);
     }
@@ -72,9 +80,7 @@ export function MinimalProductTemplate({
       : `Você está prestes a adicionar "${product.name}" ao carrinho.`;
 
   const confirmDialogLabel =
-    pendingCartAction === "remove"
-      ? "Remover produto"
-      : "Adicionar produto";
+    pendingCartAction === "remove" ? "Remover produto" : "Adicionar produto";
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-zinc-900">
@@ -82,16 +88,24 @@ export function MinimalProductTemplate({
 
       <main className="mx-auto grid max-w-7xl gap-8 px-6 py-12 lg:grid-cols-2 lg:items-start">
         <div className="space-y-6">
-          <div className="aspect-square overflow-hidden rounded-[40px] border border-zinc-100 bg-white shadow-sm">
+          <div className="relative aspect-square overflow-hidden rounded-[40px] border border-zinc-100 bg-white shadow-sm">
             {optimizedSelectedImage ? (
               <img
                 src={optimizedSelectedImage}
                 alt={product.name}
-                className="h-full w-full object-contain p-8 transition-transform duration-700 hover:scale-105"
+                className={`h-full w-full object-contain p-8 transition-transform duration-700 hover:scale-105 ${
+                  isOutOfStock ? "grayscale" : ""
+                }`}
               />
             ) : (
               <div className="flex h-full items-center justify-center text-xs font-bold uppercase tracking-widest text-zinc-300">
                 Sem imagem
+              </div>
+            )}
+
+            {isOutOfStock && (
+              <div className="absolute left-6 top-6 rounded-full bg-zinc-900 px-4 py-2 text-[11px] font-black uppercase tracking-widest text-white shadow-sm">
+                Esgotado
               </div>
             )}
           </div>
@@ -118,7 +132,9 @@ export function MinimalProductTemplate({
                         "/upload/w_200,q_auto,f_auto/"
                       )}
                       alt={`${product.name} - imagem ${index + 1}`}
-                      className="h-full w-full object-cover"
+                      className={`h-full w-full object-cover ${
+                        isOutOfStock ? "grayscale" : ""
+                      }`}
                     />
                   </button>
                 );
@@ -154,32 +170,48 @@ export function MinimalProductTemplate({
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={openCartConfirmation}
-            className={`group mt-10 flex w-full items-center justify-center gap-3 rounded-2xl py-5 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:shadow-xl active:scale-95 ${
-              isProductInCart
-                ? "bg-rose-600 hover:bg-rose-500"
-                : "bg-zinc-900 hover:bg-zinc-800"
-            }`}
-          >
-            {isProductInCart ? (
-              <>
-                <Trash2 size={16} />
-                Remover do carrinho
-              </>
-            ) : (
-              <>
-                <Plus size={16} />
-                Adicionar ao carrinho
-              </>
-            )}
-          </button>
+          {isOutOfStock ? (
+            <button
+              type="button"
+              disabled
+              className="mt-10 flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-2xl bg-zinc-300 py-5 text-[11px] font-bold uppercase tracking-[0.2em] text-white"
+            >
+              Esgotado
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={openCartConfirmation}
+              className={`group mt-10 flex w-full items-center justify-center gap-3 rounded-2xl py-5 text-[11px] font-bold uppercase tracking-[0.2em] text-white transition-all hover:shadow-xl active:scale-95 ${
+                isProductInCart
+                  ? "bg-rose-600 hover:bg-rose-500"
+                  : "bg-zinc-900 hover:bg-zinc-800"
+              }`}
+            >
+              {isProductInCart ? (
+                <>
+                  <Trash2 size={16} />
+                  Remover do carrinho
+                </>
+              ) : (
+                <>
+                  <Plus size={16} />
+                  Adicionar ao carrinho
+                </>
+              )}
+            </button>
+          )}
 
-          {isProductInCart && (
+          {isProductInCart && !isOutOfStock && (
             <div className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
               <Check size={16} />
               Produto já está no carrinho
+            </div>
+          )}
+
+          {isOutOfStock && (
+            <div className="mt-4 rounded-2xl bg-zinc-50 px-4 py-3 text-center text-sm font-semibold text-zinc-500">
+              Este produto está indisponível no momento.
             </div>
           )}
         </div>

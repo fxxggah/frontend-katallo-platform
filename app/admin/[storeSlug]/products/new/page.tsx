@@ -17,6 +17,7 @@ import {
   Star,
   Tag,
   UploadCloud,
+  Archive,
 } from "lucide-react";
 
 import { productService } from "@/services/productService";
@@ -44,6 +45,7 @@ export default function NewProductPage() {
   const [price, setPrice] = useState("");
   const [categoryId, setCategoryId] = useState<number | "">("");
   const [featured, setFeatured] = useState(false);
+  const [inStock, setInStock] = useState(true);
   const [images, setImages] = useState<SortableProductImage[]>([]);
 
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
@@ -77,6 +79,27 @@ export default function NewProductPage() {
       });
     };
   }, [images]);
+
+  function handleToggleInStock() {
+    setInStock((current) => {
+      const nextValue = !current;
+
+      if (!nextValue) {
+        setFeatured(false);
+      }
+
+      return nextValue;
+    });
+  }
+
+  function handleToggleFeatured() {
+    if (!inStock) {
+      toast.error("Produto esgotado não pode ser marcado como destaque.");
+      return;
+    }
+
+    setFeatured((current) => !current);
+  }
 
   function handleSelectImages(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? []);
@@ -140,8 +163,8 @@ export default function NewProductPage() {
         description: description.trim(),
         price: currencyStringToNumber(price),
         categoryId: Number(categoryId),
-        visible: true,
-        featured,
+        inStock,
+        featured: inStock ? featured : false,
       });
 
       for (const image of images) {
@@ -178,12 +201,11 @@ export default function NewProductPage() {
 
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
               Cadastre um novo item para aparecer na vitrine pública da loja.
-              Você também pode adicionar e reorganizar imagens antes de criar.
             </p>
 
             <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700">
               <CheckCircle2 size={12} />
-              Produto ficará visível ao criar
+              {inStock ? "Produto em estoque ao criar" : "Produto esgotado ao criar"}
             </div>
           </div>
         </div>
@@ -287,18 +309,62 @@ export default function NewProductPage() {
 
             <button
               type="button"
-              onClick={() => setFeatured((current) => !current)}
-              className={`flex w-full items-center justify-between rounded-2xl border p-5 text-left transition-all ${featured
-                ? "border-amber-200 bg-amber-50"
-                : "border-slate-200 bg-slate-50/60 hover:bg-white"
-                }`}
+              onClick={handleToggleInStock}
+              className={`flex w-full items-center justify-between rounded-2xl border p-5 text-left transition-all ${
+                inStock
+                  ? "border-emerald-200 bg-emerald-50"
+                  : "border-zinc-200 bg-zinc-50"
+              }`}
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${featured
-                    ? "bg-amber-500 text-white"
-                    : "bg-white text-slate-400"
-                    }`}
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${
+                    inStock
+                      ? "bg-emerald-500 text-white"
+                      : "bg-zinc-200 text-zinc-500"
+                  }`}
+                >
+                  <Archive size={20} />
+                </div>
+
+                <div>
+                  <p className="text-sm font-black text-slate-900">
+                    {inStock ? "Produto em estoque" : "Produto esgotado"}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Produtos esgotados aparecem no catálogo, mas não podem ir
+                    para destaque, novidades ou carrinho.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className={`flex h-6 w-6 items-center justify-center rounded-md border-2 transition-all ${
+                  inStock
+                    ? "border-emerald-500 bg-emerald-500 text-white"
+                    : "border-slate-300 bg-white text-transparent"
+                }`}
+              >
+                <CheckCircle2 className="h-4 w-4" />
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleToggleFeatured}
+              className={`flex w-full items-center justify-between rounded-2xl border p-5 text-left transition-all ${
+                featured
+                  ? "border-amber-200 bg-amber-50"
+                  : "border-slate-200 bg-slate-50/60 hover:bg-white"
+              } ${!inStock ? "cursor-not-allowed opacity-60" : ""}`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-11 w-11 items-center justify-center rounded-xl ${
+                    featured
+                      ? "bg-amber-500 text-white"
+                      : "bg-white text-slate-400"
+                  }`}
                 >
                   <Star size={20} />
                 </div>
@@ -308,16 +374,19 @@ export default function NewProductPage() {
                     Produto em destaque
                   </p>
                   <p className="text-xs text-slate-500">
-                    Exibir este produto na seção de destaques da loja.
+                    {!inStock
+                      ? "Produto esgotado não pode ser destacado."
+                      : "Exibir este produto na seção de destaques da loja."}
                   </p>
                 </div>
               </div>
 
               <div
-                className={`flex h-6 w-6 items-center justify-center rounded-md border-2 transition-all ${featured
-                  ? "border-amber-500 bg-amber-500 text-white"
-                  : "border-slate-300 bg-white text-transparent"
-                  }`}
+                className={`flex h-6 w-6 items-center justify-center rounded-md border-2 transition-all ${
+                  featured
+                    ? "border-amber-500 bg-amber-500 text-white"
+                    : "border-slate-300 bg-white text-transparent"
+                }`}
               >
                 <CheckCircle2 className="h-4 w-4" />
               </div>
@@ -380,59 +449,6 @@ export default function NewProductPage() {
                 Arraste para reorganizar. A primeira imagem será enviada como
                 principal. Limite: 8 imagens.
               </p>
-            </CardContent>
-          </Card>
-
-          <Card className="rounded-3xl border-slate-100 bg-white shadow-sm">
-            <CardHeader>
-              <CardTitle className="text-lg font-black text-slate-900">
-                Resumo
-              </CardTitle>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                  Produto
-                </p>
-                <p className="mt-1 font-bold text-slate-900">
-                  {name || "Nome do produto"}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                  Preço
-                </p>
-                <p className="mt-1 font-bold text-slate-900">
-                  {price
-                    ? currencyStringToNumber(price).toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })
-                    : "Não definido"}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                  Imagens
-                </p>
-                <p className="mt-1 font-bold text-slate-900">
-                  {images.length > 0
-                    ? `${images.length} imagem(ns)`
-                    : "Nenhuma imagem"}
-                </p>
-              </div>
-
-              <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4">
-                <p className="text-xs font-black uppercase tracking-widest text-slate-400">
-                  Status
-                </p>
-                <p className="mt-1 font-bold text-slate-900">
-                  {featured ? "Destaque + visível" : "Visível"}
-                </p>
-              </div>
             </CardContent>
           </Card>
         </aside>
