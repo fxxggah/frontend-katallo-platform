@@ -31,37 +31,38 @@ export default function StoreHomePage() {
   );
   const [newArrivals, setNewArrivals] = useState<ProductResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
-        setHasError(false);
+
+        const storeData = await storeService.getStoreBySlug(storeSlug);
+        setStore(storeData);
 
         const [
-          storeData,
           categoriesData,
           productsData,
           featuredProductsData,
           newArrivalsData,
         ] = await Promise.all([
-          storeService.getStoreBySlug(storeSlug),
           categoryService.getPublicCategories(storeSlug),
           productService.getPublicProducts(storeSlug, { page: 0, size: 12 }),
           productService.getFeaturedProducts(storeSlug),
           productService.getNewArrivals(storeSlug),
-          analyticsService.registerStoreView(storeSlug),
         ]);
 
-        setStore(storeData);
         setCategories(categoriesData);
         setProductsPage(productsData);
         setFeaturedProducts(featuredProductsData);
         setNewArrivals(newArrivalsData);
+
+        analyticsService.registerStoreView(storeSlug).catch(() => {
+          console.warn("Erro ao registrar visualização da loja");
+        });
       } catch (error) {
         console.error("Erro ao carregar home da loja", error);
-        setHasError(true);
+        setStore(null);
       } finally {
         setIsLoading(false);
       }
@@ -72,10 +73,16 @@ export default function StoreHomePage() {
     }
   }, [storeSlug]);
 
-  if (isLoading) return <div className="p-6">Carregando...</div>;
+  if (isLoading) {
+    return <div className="p-6">Carregando...</div>;
+  }
 
-  if (hasError || !store || !productsPage) {
+  if (!store) {
     return <StoreNotFound />;
+  }
+
+  if (!productsPage) {
+    return <div className="p-6">Carregando produtos...</div>;
   }
 
   return (

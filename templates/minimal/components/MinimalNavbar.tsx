@@ -20,7 +20,7 @@ export function MinimalNavbar({ store }: { store: StoreResponse }) {
             Início
           </Link>
           <Link 
-            href={`/${store.slug}/carrinho`} 
+            href={`/${store.slug}/cart`} 
             className="group relative flex items-center gap-2.5 rounded-full bg-zinc-950 px-6 py-2.5 text-[11px] font-bold uppercase tracking-widest text-white shadow-xl shadow-zinc-200 transition-all hover:bg-zinc-800 hover:shadow-zinc-300 active:scale-95"
           >
             <ShoppingBag size={14} className="transition-transform group-hover:-rotate-12" />

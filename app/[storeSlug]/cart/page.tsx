@@ -15,19 +15,17 @@ export default function CartPage() {
 
   const [store, setStore] = useState<StoreResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
-        setHasError(false);
 
         const storeData = await storeService.getStoreBySlug(storeSlug);
         setStore(storeData);
       } catch (error) {
         console.error("Erro ao carregar carrinho da loja", error);
-        setHasError(true);
+        setStore(null);
       } finally {
         setIsLoading(false);
       }
@@ -38,9 +36,11 @@ export default function CartPage() {
     }
   }, [storeSlug]);
 
-  if (isLoading) return <div className="p-6">Carregando...</div>;
+  if (isLoading) {
+    return <div className="p-6">Carregando...</div>;
+  }
 
-  if (hasError || !store) {
+  if (!store) {
     return <StoreNotFound />;
   }
 

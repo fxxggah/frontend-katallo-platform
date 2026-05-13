@@ -10,7 +10,7 @@ type MinimalCategoryCardProps = {
 export function MinimalCategoryCard({ store, category }: MinimalCategoryCardProps) {
   return (
     <Link
-      href={`/${store.slug}/categoria/${category.slug}`}
+      href={`/${store.slug}/category/${category.slug}`}
       className="group relative flex items-center justify-between overflow-hidden rounded-2xl border border-zinc-100 bg-zinc-50/50 p-6 transition-all duration-300 hover:bg-white hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)]"
     >
       <div className="z-10">

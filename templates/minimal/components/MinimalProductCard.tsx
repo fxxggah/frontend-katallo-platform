@@ -21,7 +21,7 @@ export function MinimalProductCard({
 
   return (
     <Link
-      href={`/${store.slug}/produto/${product.slug}`}
+      href={`/${store.slug}/product/${product.slug}`}
       className="group flex flex-col"
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-100">

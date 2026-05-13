@@ -185,7 +185,7 @@ export function CartContent({ store }: CartContentProps) {
                 <CardContent className="p-4 md:p-6">
                   <div className="flex gap-4 md:gap-6">
                     <Link
-                      href={`/${store.slug}/produto/${item.slug}`}
+                      href={`/${store.slug}/product/${item.slug}`}
                       className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl bg-secondary md:h-32 md:w-32"
                     >
                       {item.image ? (
@@ -205,7 +205,7 @@ export function CartContent({ store }: CartContentProps) {
 
                     <div className="flex min-w-0 flex-1 flex-col">
                       <Link
-                        href={`/${store.slug}/produto/${item.slug}`}
+                        href={`/${store.slug}/product/${item.slug}`}
                         className="line-clamp-2 text-base font-medium transition-colors hover:text-primary md:text-lg"
                       >
                         {item.name}
