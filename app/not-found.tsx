@@ -25,7 +25,7 @@ export default function NotFound() {
         </p>
 
         <h1 className="max-w-3xl text-4xl font-black tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-          Ops, essa página saiu da vitrine.
+          Ops, essa página não existe ou saiu da vitrine.
         </h1>
 
         <p className="mt-5 max-w-2xl text-base leading-relaxed text-muted-foreground sm:text-lg">

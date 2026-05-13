@@ -2,17 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+
 import { storeService } from "@/services/storeService";
 import { categoryService } from "@/services/categoryService";
 import { productService } from "@/services/productService";
+import { analyticsService } from "@/services/analyticsService";
+
 import type {
   CategoryResponse,
   PagedResponse,
   ProductResponse,
   StoreResponse,
 } from "@/types";
+
 import { StoreTemplateRenderer } from "@/templates/base/StoreTemplateRenderer";
-import { analyticsService } from "@/services/analyticsService";
+import StoreNotFound from "./not-found";
 
 export default function StoreHomePage() {
   const params = useParams();
@@ -22,14 +26,18 @@ export default function StoreHomePage() {
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [productsPage, setProductsPage] =
     useState<PagedResponse<ProductResponse> | null>(null);
-  const [featuredProducts, setFeaturedProducts] = useState<ProductResponse[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<ProductResponse[]>(
+    []
+  );
   const [newArrivals, setNewArrivals] = useState<ProductResponse[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     async function loadData() {
       try {
         setIsLoading(true);
+        setHasError(false);
 
         const [
           storeData,
@@ -53,6 +61,7 @@ export default function StoreHomePage() {
         setNewArrivals(newArrivalsData);
       } catch (error) {
         console.error("Erro ao carregar home da loja", error);
+        setHasError(true);
       } finally {
         setIsLoading(false);
       }
@@ -65,8 +74,8 @@ export default function StoreHomePage() {
 
   if (isLoading) return <div className="p-6">Carregando...</div>;
 
-  if (!store || !productsPage) {
-    return <div className="p-6">Loja não encontrada.</div>;
+  if (hasError || !store || !productsPage) {
+    return <StoreNotFound />;
   }
 
   return (
