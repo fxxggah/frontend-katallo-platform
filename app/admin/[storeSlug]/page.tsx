@@ -176,13 +176,6 @@ export default function AdminStoreDashboardPage() {
 
     const actions: QuickAction[] = [
       {
-        title: "Novo produto",
-        description: "Adicionar item na vitrine",
-        href: `/admin/${store.slug}/products/new`,
-        icon: <Plus className="h-5 w-5" />,
-        primary: true,
-      },
-      {
         title: "Produtos",
         description: "Preços, fotos e destaques",
         href: `/admin/${store.slug}/products`,
@@ -203,12 +196,20 @@ export default function AdminStoreDashboardPage() {
     ];
 
     if (role === "OWNER") {
-      actions.push({
-        title: "Configurações",
-        description: "Dados da loja",
-        href: `/admin/${store.slug}/settings`,
-        icon: <Settings className="h-5 w-5" />,
-      });
+      actions.push(
+        {
+          title: "Equipe",
+          description: "Membros e convites",
+          href: `/admin/${store.slug}/users`,
+          icon: <Users className="h-5 w-5" />,
+        },
+        {
+          title: "Configurações",
+          description: "Dados da loja",
+          href: `/admin/${store.slug}/settings`,
+          icon: <Settings className="h-5 w-5" />,
+        }
+      );
     }
 
     return actions;
@@ -276,8 +277,8 @@ export default function AdminStoreDashboardPage() {
 
                 <span
                   className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${store.active
-                      ? "bg-emerald-50 text-emerald-700"
-                      : "bg-red-50 text-red-700"
+                    ? "bg-emerald-50 text-emerald-700"
+                    : "bg-red-50 text-red-700"
                     }`}
                 >
                   {store.active ? (
@@ -463,8 +464,8 @@ export default function AdminStoreDashboardPage() {
               <CardContent className="p-5">
                 <div
                   className={`flex h-11 w-11 items-center justify-center rounded-2xl ${action.primary
-                      ? "bg-white/10 text-white"
-                      : "bg-slate-50 text-slate-700"
+                    ? "bg-white/10 text-white"
+                    : "bg-slate-50 text-slate-700"
                     }`}
                 >
                   {action.icon}

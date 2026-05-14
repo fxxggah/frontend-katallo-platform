@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import {
   CheckCircle2,
   Globe,
@@ -23,6 +23,7 @@ import { toast } from "sonner";
 
 export default function SettingsPage() {
   const params = useParams();
+  const router = useRouter();
   const storeSlug = params.storeSlug as string;
 
   const [store, setStore] = useState<StoreResponse | null>(null);
@@ -64,14 +65,21 @@ export default function SettingsPage() {
       setIsSaving(true);
       setSavedSuccessfully(false);
 
-      await storeService.updateStore(store.slug, {
+      const updatedStore = await storeService.updateStore(store.slug, {
         name,
         whatsappNumber: whatsapp,
         instagram,
       });
 
       setSavedSuccessfully(true);
+
       toast.success("Configurações salvas com sucesso.");
+
+      if (updatedStore.slug !== store.slug) {
+        router.replace(`/admin/${updatedStore.slug}/settings`);
+      }
+
+      setStore(updatedStore);
 
       setTimeout(() => {
         setSavedSuccessfully(false);
