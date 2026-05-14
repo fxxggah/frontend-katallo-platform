@@ -165,13 +165,8 @@ export default function UsersPage() {
                           : "bg-slate-100 text-slate-500"
                       }`}
                     >
-                      {user.pictureUrl ? (
-                        <img
-                          src={user.pictureUrl}
-                          alt={safeName}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
+                      {
+                        (
                         initials
                       )}
 

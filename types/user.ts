@@ -7,6 +7,5 @@ export type StoreUserResponse = {
   role: StoreUserRole;
   name?: string;
   email?: string;
-  pictureUrl?: string;
   createdAt?: string;
 };
