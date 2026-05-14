@@ -216,7 +216,10 @@ export default function SettingsPage() {
 
                 <Input
                   value={instagram}
-                  onChange={(e) => setInstagram(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/^@+/, "");
+                    setInstagram(value);
+                  }}
                   placeholder="usuario_da_loja"
                   className="h-13 rounded-2xl border-slate-200 bg-slate-50/60 pl-11"
                 />

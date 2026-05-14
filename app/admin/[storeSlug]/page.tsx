@@ -193,16 +193,16 @@ export default function AdminStoreDashboardPage() {
         href: `/admin/${store.slug}/analytics`,
         icon: <BarChart3 className="h-5 w-5" />,
       },
-    ];
-
-    if (role === "OWNER") {
-      actions.push(
-        {
+      {
           title: "Equipe",
           description: "Membros e convites",
           href: `/admin/${store.slug}/users`,
           icon: <Users className="h-5 w-5" />,
         },
+    ];
+
+    if (role === "OWNER") {
+      actions.push(
         {
           title: "Configurações",
           description: "Dados da loja",

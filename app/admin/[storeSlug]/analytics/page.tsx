@@ -184,10 +184,7 @@ export default function StoreAnalyticsPage() {
                   <div key={item.date} className="space-y-2">
                     <div className="flex items-center justify-between gap-4">
                       <p className="text-sm font-bold text-slate-700">
-                        {new Date(item.date).toLocaleDateString("pt-BR", {
-                          day: "2-digit",
-                          month: "2-digit",
-                        })}
+                        {formatDate(item.date)}
                       </p>
 
                       <p className="text-sm font-black text-slate-900">
@@ -338,6 +335,12 @@ export default function StoreAnalyticsPage() {
       </section>
     </div>
   );
+}
+
+function formatDate(date: string) {
+  const [year, month, day] = date.split("-");
+
+  return `${day}/${month}`;
 }
 
 function AnalyticsCard({
