@@ -15,12 +15,13 @@ import {
   TrendingUp,
 } from "lucide-react";
 
-import {
-  analyticsService,
-  type AnalyticsSummaryResponse,
-  type DailyVisitsResponse,
-  type TopProductAnalyticsResponse,
-} from "@/services/analyticsService";
+import { analyticsService } from "@/services/analyticsService";
+
+import type {
+  AnalyticsSummaryResponse,
+  DailyVisitsResponse,
+  TopProductAnalyticsResponse,
+} from "@/types/analytics";
 
 import { Button } from "@/components/ui/button";
 import {
