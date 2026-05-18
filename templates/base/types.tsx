@@ -15,7 +15,7 @@ export type HomeTemplateProps = {
 
 export type CategoryTemplateProps = {
   store: StoreResponse;
-  category: CategoryResponse;
+  category: CategoryResponse | null;
   productsPage: PagedResponse<ProductResponse>;
 };
 

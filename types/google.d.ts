@@ -1,5 +1,26 @@
 declare global {
   interface Window {
-    google: any;
+    google?: {
+      accounts: {
+        id: {
+          initialize: (config: {
+            client_id: string;
+            callback: (response: { credential?: string }) => void;
+          }) => void;
+
+          renderButton: (
+            parent: HTMLElement,
+            options: {
+              theme?: string;
+              size?: string;
+              width?: number;
+              shape?: string;
+            }
+          ) => void;
+        };
+      };
+    };
   }
 }
+
+export {};

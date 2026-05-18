@@ -29,11 +29,9 @@ import { storeService } from "@/services/storeService";
 import { userService } from "@/services/userService";
 import { productService } from "@/services/productService";
 import { categoryService } from "@/services/categoryService";
-import {
-  analyticsService,
-  type AnalyticsSummaryResponse,
-  type TopProductAnalyticsResponse,
-} from "@/services/analyticsService";
+import { analyticsService } from "@/services/analyticsService";
+
+import type { AnalyticsSummaryResponse, TopProductAnalyticsResponse } from "@/types/analytics";
 
 import type {
   CategoryResponse,
