@@ -1,208 +1,189 @@
 "use client";
 
-import axios from "axios";
-import { LogIn, ArrowLeft, ShieldCheck } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { authService } from "@/services/authService";
+import {
+  ArrowRight,
+  ShieldCheck,
+  Sparkles,
+  Store,
+  Zap,
+} from "lucide-react";
 
-const googleClientId =
-  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ||
-  "711004756306-c1qb90c3ogkkjnsvcov86of25mmrhhjp.apps.googleusercontent.com";
+import { Button } from "@/components/ui/button";
+
+import { KatalloFullLogo } from "@/components/brand/KatalloFullLogo";
+import { KatalloLogo } from "@/components/brand/KatalloLogo";
 
 export default function LoginPage() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-
-  const redirect = searchParams.get("redirect");
-
-  const [status, setStatus] = useState<
-    "idle" | "loading-script" | "ready" | "submitting"
-  >("loading-script");
-  const [errorMessage, setErrorMessage] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const handleLogin = async (response: { credential?: string }) => {
-      if (!response?.credential) {
-        setErrorMessage("Não foi possível obter a credencial do Google.");
-        return;
-      }
-
-      try {
-        setStatus("submitting");
-        setErrorMessage("");
-
-        await authService.loginWithGoogle({
-          token: response.credential,
-        });
-
-        router.push(redirect || "/admin/stores");
-      } catch (err) {
-        console.error(err);
-
-        if (axios.isAxiosError(err) && !err.response) {
-          setErrorMessage(
-            "Não foi possível conectar ao backend. Verifique se a API está ativa."
-          );
-        } else {
-          setErrorMessage("Não foi possível concluir o login.");
-        }
-
-        setStatus("ready");
-      }
-    };
-
-    const initGoogle = () => {
-      if (cancelled || !window.google?.accounts?.id) return;
-
-      window.google.accounts.id.initialize({
-        client_id: googleClientId,
-        callback: handleLogin,
-      });
-
-      const buttonElement = document.getElementById("googleButton");
-      if (!buttonElement) return;
-
-      buttonElement.innerHTML = "";
-
-      window.google.accounts.id.renderButton(buttonElement, {
-        theme: "outline",
-        size: "large",
-        width: 320,
-        shape: "pill",
-      });
-
-      setStatus("ready");
-    };
-
-    const ensureGoogleScript = () => {
-      const existingScript = document.querySelector<HTMLScriptElement>(
-        'script[src="https://accounts.google.com/gsi/client"]'
-      );
-
-      if (existingScript) {
-        if (window.google?.accounts?.id) {
-          initGoogle();
-          return;
-        }
-
-        existingScript.addEventListener("load", initGoogle, { once: true });
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = initGoogle;
-      script.onerror = () => {
-        if (!cancelled) {
-          setErrorMessage("Falha ao carregar o script de login do Google.");
-          setStatus("idle");
-        }
-      };
-
-      document.body.appendChild(script);
-    };
-
-    ensureGoogleScript();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [router, redirect]);
-
   return (
-    <div className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-indigo-50 via-white to-slate-50 px-4">
-      <div className="absolute top-8 left-8">
-        <Link
-          href="/"
-          className="group flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-indigo-600 transition-colors"
-        >
-          <ArrowLeft
-            size={16}
-            className="group-hover:-translate-x-1 transition-transform"
-          />
-          Voltar para o site
-        </Link>
+    <main className="relative flex min-h-screen overflow-hidden bg-white">
+      {/* BACKGROUND */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[-120px] top-[-120px] h-[420px] w-[420px] rounded-full bg-indigo-100 blur-3xl" />
+
+        <div className="absolute bottom-[-160px] right-[-120px] h-[460px] w-[460px] rounded-full bg-violet-100 blur-3xl" />
+
+        <div className="absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-indigo-50 blur-3xl" />
       </div>
 
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-indigo-200/20 rounded-full blur-[120px]" />
-      <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-purple-200/20 rounded-full blur-[120px]" />
+      {/* LEFT SIDE */}
+      <section className="relative hidden w-full flex-col justify-between overflow-hidden border-r border-slate-100 bg-slate-950 p-12 lg:flex lg:w-[52%]">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.18),transparent_30%)]" />
 
-      <Card className="relative z-10 w-full max-w-[440px] border-slate-200/60 bg-white/80 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.08)] backdrop-blur-xl rounded-[2.5rem] overflow-hidden">
-        <CardHeader className="pt-12 pb-8 px-8 text-center space-y-6">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-[20px] bg-slate-900 text-white shadow-xl shadow-slate-200 group transition-all duration-500 hover:bg-indigo-600">
-            <LogIn className="h-7 w-7 group-hover:scale-110 transition-transform" />
-          </div>
+        <div className="relative z-10">
+          <KatalloLogo />
 
-          <div className="space-y-2">
-            <CardTitle className="text-4xl font-playfair font-black tracking-tight text-slate-900">
-              Bem-vindo!
-            </CardTitle>
+          <div className="mt-24 max-w-xl">
+            <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-indigo-300">
+              <Sparkles className="h-4 w-4" />
+              Plataforma premium para vendas
+            </div>
 
-            <p className="text-slate-500 font-medium px-4">
-              Acesse o seu painel administrativo para gerenciar sua vitrine
-              digital.
+            <h1 className="text-6xl font-playfair font-black leading-[1.02] tracking-tight text-white">
+              Sua loja digital com experiência de marca premium.
+            </h1>
+
+            <p className="mt-8 text-lg leading-relaxed text-slate-400">
+              Organize produtos, receba pedidos e transforme seu WhatsApp em um
+              fluxo profissional de vendas com a Katallo.
             </p>
           </div>
-        </CardHeader>
 
-        <CardContent className="pb-12 px-10 space-y-8">
-          <div className="relative flex flex-col items-center justify-center gap-6 py-6 px-4 rounded-3xl border border-slate-100 bg-slate-50/50">
-            <div
-              id="googleButton"
-              className="transition-all hover:scale-[1.02] active:scale-[0.98]"
-            />
+          <div className="mt-20 grid gap-5">
+            {[
+              {
+                icon: <Store className="h-5 w-5" />,
+                title: "Catálogo profissional",
+                description:
+                  "Tenha uma vitrine moderna e organizada em minutos.",
+              },
+              {
+                icon: <Zap className="h-5 w-5" />,
+                title: "Pedidos mais rápidos",
+                description:
+                  "Receba pedidos completos direto no WhatsApp.",
+              },
+              {
+                icon: <ShieldCheck className="h-5 w-5" />,
+                title: "Login seguro",
+                description:
+                  "Autenticação moderna e protegida com Google.",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className="flex items-start gap-4 rounded-3xl border border-white/5 bg-white/5 p-5 backdrop-blur-sm"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-300">
+                  {item.icon}
+                </div>
 
-            <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-              <ShieldCheck size={14} className="text-indigo-500" />
-              Conexão Segura via Google
+                <div>
+                  <h3 className="text-lg font-bold text-white">
+                    {item.title}
+                  </h3>
+
+                  <p className="mt-1 text-sm leading-relaxed text-slate-400">
+                    {item.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative z-10 flex items-center justify-between border-t border-white/5 pt-6">
+          <p className="text-sm text-slate-500">
+            © 2026 Katallo Tecnologias Ltda.
+          </p>
+
+          <div className="flex items-center gap-2 rounded-full border border-white/5 bg-white/5 px-4 py-2">
+            <div className="h-2 w-2 rounded-full bg-emerald-400" />
+
+            <span className="text-xs font-bold uppercase tracking-[0.18em] text-slate-300">
+              Plataforma operacional
+            </span>
+          </div>
+        </div>
+      </section>
+
+      {/* RIGHT SIDE */}
+      <section className="relative flex w-full items-center justify-center px-6 py-10 lg:w-[48%]">
+        <div className="w-full max-w-md">
+          {/* MOBILE LOGO */}
+          <div className="mb-10 flex justify-center lg:hidden">
+            <KatalloFullLogo />
+          </div>
+
+          {/* LOGIN CARD */}
+          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.08)] sm:p-10">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-black uppercase tracking-[0.25em] text-indigo-600">
+                  Bem-vindo
+                </p>
+
+                <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-900">
+                  Entrar
+                </h2>
+              </div>
+            </div>
+
+            <p className="mt-4 text-base leading-relaxed text-slate-500">
+              Entre na plataforma utilizando sua conta Google.
+            </p>
+
+            {/* GOOGLE BUTTON */}
+            <div className="mt-10">
+              <Button className="group h-16 w-full rounded-2xl border border-slate-200 bg-white text-base font-bold text-slate-900 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50">
+                {/* GOOGLE ICON */}
+                <svg
+                  className="mr-3 h-5 w-5"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    fill="#EA4335"
+                    d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C17 3.3 14.7 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.8-.1-1.2H12z"
+                  />
+                </svg>
+
+                Continuar com Google
+
+                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </Button>
+            </div>
+
+            {/* SECURITY */}
+            <div className="mt-8 rounded-3xl border border-indigo-100 bg-indigo-50/70 p-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-indigo-100 text-indigo-600">
+                  <ShieldCheck className="h-5 w-5" />
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-[0.18em] text-slate-900">
+                    Login Seguro
+                  </h3>
+
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                    Utilizamos autenticação via Google para oferecer uma
+                    experiência rápida, moderna e protegida.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
 
-          {(status === "loading-script" || status === "submitting") && (
-            <div className="flex flex-col gap-3">
-              <Button
-                className="w-full h-12 rounded-2xl bg-slate-900 text-white font-bold"
-                disabled
-              >
-                <div className="flex items-center gap-3">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
-                  {status === "loading-script"
-                    ? "Preparando ambiente..."
-                    : "Autenticando..."}
-                </div>
-              </Button>
-            </div>
-          )}
-
-          {errorMessage && (
-            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-              <p className="rounded-2xl border border-red-100 bg-red-50/50 px-4 py-3 text-sm text-red-600 font-medium text-center">
-                {errorMessage}
-              </p>
-            </div>
-          )}
-
-          <p className="text-center text-[11px] text-slate-400 font-medium leading-relaxed">
-            Ao entrar, você concorda com nossos <br />
-            <a href="#" className="underline hover:text-slate-900">
-              Termos de Uso
-            </a>{" "}
-            e{" "}
-            <a href="#" className="underline hover:text-slate-900">
-              Política de Privacidade
-            </a>
-            .
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+          {/* TERMS */}
+          <div className="mt-8 text-center">
+            <p className="text-sm leading-relaxed text-slate-400">
+              Ao continuar, você concorda com os Termos de Uso e Política de
+              Privacidade da Katallo.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

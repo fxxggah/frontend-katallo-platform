@@ -3,19 +3,41 @@ import { Inter, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
 })
 
-const playfair = Playfair_Display({ 
+const playfair = Playfair_Display({
   subsets: ["latin"],
   variable: "--font-playfair",
 })
 
 export const metadata: Metadata = {
-  title: 'Katallo | Catálogo Digital Premium',
-  description: 'Transforme seu Instagram em uma máquina de vendas com um catálogo profissional.',
+  title: {
+    default: "Katallo",
+    template: "%s | Katallo",
+  },
+
+  description:
+    "Transforme seu Instagram em uma máquina de vendas com um catálogo profissional.",
+
+  openGraph: {
+    title: "Katallo",
+    description:
+      "Transforme seu Instagram em uma máquina de vendas com um catálogo profissional.",
+    siteName: "Katallo",
+    locale: "pt_BR",
+    type: "website",
+    images: [
+      {
+        url: "/brand/katallo-full.png",
+        width: 1500,
+        height: 830,
+        alt: "Katallo",
+      },
+    ],
+  },
 }
 
 export const viewport: Viewport = {

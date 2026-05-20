@@ -1,5 +1,7 @@
 "use client";
 
+import { KatalloFullLogo } from "@/components/brand/KatalloFullLogo";
+import Image from "next/image";
 import React, { useState, useEffect } from 'react';
 import { Check, ArrowRight, Layout, Zap, ShoppingBag, Smartphone, Globe, ShieldCheck } from 'lucide-react';
 import Link from "next/link";
@@ -148,12 +150,7 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-white font-sans">
       <header className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-xl border-b border-slate-100 py-4' : 'bg-transparent py-6'}`}>
         <div className="container mx-auto px-6 flex items-center justify-between">
-          <div className="flex items-center gap-3 group cursor-pointer">
-            <div className="w-12 h-12 bg-slate-900 group-hover:bg-indigo-600 rounded-2xl flex items-center justify-center text-white font-bold transition-all duration-500 group-hover:rotate-[360deg] shadow-lg shadow-slate-200">
-              K
-            </div>
-            <span className="text-2xl font-black tracking-tighter text-slate-900 uppercase">Katallo</span>
-          </div>
+          <KatalloFullLogo priority />
 
           <nav className="hidden lg:flex items-center gap-12 text-[11px] font-black text-slate-400 uppercase tracking-[0.2em]">
             <a href="#" className="hover:text-indigo-600 transition-colors">Produtos</a>
@@ -203,9 +200,13 @@ export default function HomePage() {
       <footer className="py-24 bg-white border-t border-slate-100">
         <div className="container mx-auto px-6 grid md:grid-cols-4 gap-16">
           <div className="col-span-1 md:col-span-2">
-            <div className="flex items-center gap-3 mb-8">
-              <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold text-xs">K</div>
-              <span className="text-xl font-black text-slate-900">KATALLO</span>
+            <div className="relative mb-8 h-10 w-40">
+              <Image
+                src="/brand/katallo-full.png"
+                alt="Katallo"
+                fill
+                className="object-contain object-left"
+              />
             </div>
             <p className="text-slate-500 max-w-sm font-medium text-lg leading-relaxed">
               Elevando o padrão do comércio local com tecnologia de ponta e design focado em conversão.

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, Home, SearchX, Sparkles } from "lucide-react";
-
+import { KatalloFullLogo } from "@/components/brand/KatalloFullLogo";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
@@ -15,10 +15,7 @@ export default function NotFound() {
           Página não encontrada
         </div>
 
-        <div className="relative mb-8 flex h-28 w-28 items-center justify-center rounded-[2rem] border border-border bg-card shadow-xl sm:h-32 sm:w-32">
-          <div className="absolute inset-3 rounded-[1.5rem] bg-secondary" />
-          <SearchX className="relative h-12 w-12 text-primary sm:h-14 sm:w-14" />
-        </div>
+        <KatalloFullLogo priority />
 
         <p className="mb-3 text-sm font-black uppercase tracking-[0.35em] text-muted-foreground">
           Erro 404
