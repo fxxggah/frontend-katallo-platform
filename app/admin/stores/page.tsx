@@ -72,14 +72,20 @@ export default function StoresPage() {
   }, []);
 
   const handleCreateStore = () => {
-  const phone = "5514996016512";
+    const phone = "5514996016512";
 
-  const message = encodeURIComponent(
-    "Olá! Tenho interesse em criar minha loja na Katallo e gostaria de saber mais sobre..."
-  );
+    const message = encodeURIComponent(
+      "Olá! Tenho interesse em criar minha loja na Katallo e gostaria de saber mais sobre..."
+    );
 
-  window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-};
+    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+  };
+
+  function handleLogout() {
+    authService.logout();
+
+    router.replace("/login");
+  }
 
   function handleOpenAdmin(storeSlug: string) {
     router.push(`/admin/${storeSlug}`);
@@ -100,7 +106,7 @@ export default function StoresPage() {
     return (
       <div className="min-h-screen overflow-hidden bg-[#f8fafc]">
         <div className="relative flex min-h-screen items-center justify-center px-6">
-          
+
           {/* Background */}
           <div className="absolute inset-0">
             <div className="absolute left-[-10%] top-[-10%] h-[420px] w-[420px] rounded-full bg-indigo-100/60 blur-3xl" />
@@ -141,7 +147,7 @@ export default function StoresPage() {
       <div className="min-h-screen bg-[#f8fafc] px-4 py-20">
         <div className="mx-auto flex min-h-[70vh] max-w-lg items-center justify-center">
           <Card className="overflow-hidden rounded-[2.5rem] border border-red-100 bg-white shadow-[0_30px_80px_rgba(239,68,68,0.08)]">
-            
+
             <div className="h-2 w-full bg-gradient-to-r from-red-500 via-rose-500 to-red-500" />
 
             <CardHeader className="space-y-6 px-10 pt-10 text-center">
@@ -193,7 +199,7 @@ export default function StoresPage() {
 
   return (
     <div className="min-h-screen overflow-hidden bg-[#f8fafc]">
-      
+
       {/* Background global */}
       <div className="pointer-events-none fixed inset-0">
         <div className="absolute left-[-15%] top-[-10%] h-[500px] w-[500px] rounded-full bg-indigo-100/40 blur-3xl" />
@@ -202,14 +208,14 @@ export default function StoresPage() {
       </div>
 
       <div className="relative mx-auto max-w-7xl px-6 py-10 lg:px-8">
-        
+
         {/* Hero */}
         <section className="relative overflow-hidden rounded-[3rem] border border-white/60 bg-white/80 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.06)] backdrop-blur-xl lg:p-12">
-          
+
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent_30%)]" />
 
           <div className="relative flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
-            
+
             <div className="max-w-2xl">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-100 bg-indigo-50 px-4 py-2 text-[11px] font-black uppercase tracking-[0.2em] text-indigo-600">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -231,7 +237,7 @@ export default function StoresPage() {
 
               {/* Stats */}
               <div className="mt-10 grid gap-4 sm:grid-cols-3">
-                
+
                 <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
                   <div className="flex items-center gap-2 text-slate-400">
                     <LayoutGrid className="h-4 w-4" />
@@ -263,6 +269,14 @@ export default function StoresPage() {
             {/* CTA */}
             <div className="flex flex-col gap-4 sm:flex-row lg:flex-col">
               <Button
+                variant="outline"
+                onClick={handleLogout}
+                className="h-14 rounded-2xl border-slate-200 bg-white px-8 font-bold text-slate-600 shadow-lg shadow-slate-100 transition-all hover:scale-[1.02] hover:bg-slate-50"
+              >
+                <LogOut className="mr-2 h-5 w-5" />
+                Sair da conta
+              </Button>
+              <Button
                 onClick={handleCreateStore}
                 className="h-14 rounded-2xl bg-indigo-600 px-8 font-bold shadow-2xl shadow-indigo-200 transition-all hover:scale-[1.02] hover:bg-indigo-700"
               >
@@ -276,9 +290,9 @@ export default function StoresPage() {
         {/* Estado vazio */}
         {!hasStores && (
           <section className="relative mt-14 overflow-hidden rounded-[3rem] border border-dashed border-slate-200 bg-white/70 p-10 shadow-[0_20px_60px_rgba(15,23,42,0.04)] backdrop-blur">
-            
+
             <div className="flex flex-col items-center justify-center text-center">
-              
+
               <div className="relative mb-10">
                 <div className="absolute inset-0 rounded-full bg-indigo-100 blur-[90px]" />
 
@@ -329,37 +343,35 @@ export default function StoresPage() {
             </div>
 
             <div className="grid gap-8 md:grid-cols-2 xl:grid-cols-3">
-              
+
               {stores.map((store) => (
                 <Card
                   key={store.id}
                   className="group relative overflow-hidden rounded-[2.5rem] border border-white/60 bg-white/90 shadow-[0_20px_60px_rgba(15,23,42,0.05)] backdrop-blur transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_30px_80px_rgba(99,102,241,0.12)]"
                 >
-                  
+
                   {/* Glow */}
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(99,102,241,0.08),transparent_35%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
                   <CardHeader className="relative space-y-6 px-8 pt-8">
-                    
+
                     <div className="flex items-start justify-between gap-4">
-                      
+
                       <div className="flex h-16 w-16 items-center justify-center rounded-[1.7rem] border border-slate-100 bg-slate-50 text-slate-400 transition-all duration-500 group-hover:scale-105 group-hover:border-indigo-100 group-hover:bg-indigo-50 group-hover:text-indigo-600">
                         <Store className="h-8 w-8" />
                       </div>
 
                       <div
-                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] ${
-                          store.active
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] ${store.active
                             ? "bg-emerald-50 text-emerald-600"
                             : "bg-red-50 text-red-600"
-                        }`}
+                          }`}
                       >
                         <span
-                          className={`h-2 w-2 rounded-full ${
-                            store.active
+                          className={`h-2 w-2 rounded-full ${store.active
                               ? "bg-emerald-500"
                               : "bg-red-500"
-                          }`}
+                            }`}
                         />
 
                         {store.active ? "Online" : "Pausada"}
@@ -399,7 +411,7 @@ export default function StoresPage() {
                   <CardContent className="relative space-y-6 px-8 pb-8">
 
                     <div className="grid gap-3">
-                      
+
                       <Button
                         onClick={() => handleOpenAdmin(store.slug)}
                         className="group/button h-12 rounded-2xl bg-slate-900 font-bold shadow-lg shadow-slate-100 transition-all hover:bg-indigo-600"
@@ -428,7 +440,7 @@ export default function StoresPage() {
                 onClick={handleCreateStore}
                 className="group relative flex min-h-[420px] flex-col items-center justify-center overflow-hidden rounded-[2.5rem] border-2 border-dashed border-slate-200 bg-white/60 p-10 backdrop-blur transition-all duration-500 hover:border-indigo-300 hover:bg-white"
               >
-                
+
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.06),transparent_50%)] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
                 <div className="relative flex h-20 w-20 items-center justify-center rounded-[2rem] border border-slate-100 bg-white text-slate-400 shadow-xl transition-all duration-500 group-hover:scale-110 group-hover:text-indigo-600">
@@ -452,7 +464,7 @@ export default function StoresPage() {
         {/* Footer */}
         <footer className="mt-20 border-t border-slate-100 pt-8">
           <div className="flex flex-col items-center justify-between gap-4 text-center md:flex-row md:text-left">
-            
+
             <div>
               <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-300">
                 Katallo Platform

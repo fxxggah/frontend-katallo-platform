@@ -12,7 +12,8 @@ export const authService = {
   },
 
   logout(): void {
-  tokenStorage.remove();
+  localStorage.removeItem("token");
+  localStorage.removeItem("user");
 
   if (typeof window !== "undefined") {
     window.location.href = "/login";
