@@ -1,4 +1,4 @@
-import type { StoreTemplateModule } from "../base/types";
+import type { StoreTemplateModule } from "@/templates/base/types";
 
 import { MinimalHomeTemplate } from "../minimal/pages/MinimalHomeTemplate";
 import { MinimalCategoryTemplate } from "../minimal/pages/MinimalCategoryTemplate";
