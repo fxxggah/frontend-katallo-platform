@@ -17,6 +17,7 @@ import {
   LayoutGrid,
   ChevronRight,
   Activity,
+  LogOut,
 } from "lucide-react";
 
 import { storeService } from "@/services/storeService";
@@ -70,9 +71,15 @@ export default function StoresPage() {
     loadStores();
   }, []);
 
-  function handleCreateStore() {
-    router.push("/admin/stores/new");
-  }
+  const handleCreateStore = () => {
+  const phone = "5514996016512";
+
+  const message = encodeURIComponent(
+    "Olá! Tenho interesse em criar minha loja na Katallo e gostaria de saber mais sobre..."
+  );
+
+  window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+};
 
   function handleOpenAdmin(storeSlug: string) {
     router.push(`/admin/${storeSlug}`);

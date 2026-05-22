@@ -118,10 +118,8 @@ export default function LoginPage() {
           {
             theme: "filled_white",
             size: "large",
-            text: "continue_with",
             shape: "pill",
-            width: 360,
-            logo_alignment: "left",
+            width: 360
           }
         );
 
@@ -306,69 +304,50 @@ export default function LoginPage() {
               Entre na plataforma utilizando sua conta Google.
             </p>
 
-            {/* GOOGLE BUTTON */}
-            {/* GOOGLE BUTTON */}
-<div className="mt-10 overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)]">
-  
-  <div className="mb-5">
-    <div className="flex items-center gap-3">
-      <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <svg
-          className="h-5 w-5"
-          viewBox="0 0 24 24"
-        >
-          <path
-            fill="#EA4335"
-            d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C17 3.3 14.7 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.8-.1-1.2H12z"
-          />
-        </svg>
-      </div>
-
-      <div>
-        <p className="text-sm font-black text-slate-900">
-          Entrar com Google
-        </p>
-
-        <p className="text-xs text-slate-500">
-          Login rápido e seguro
-        </p>
-      </div>
-    </div>
+            {/* GOOGLE BUTTON CONTROLLER */}
+<div className="relative flex justify-center mt-6">
+  {/* Botão Bonito Customizado (Visual) */}
+  <div className="
+    pointer-events-none absolute inset-0 
+    flex h-14 w-full items-center justify-center gap-3 
+    rounded-2xl border border-slate-200 bg-white 
+    text-base font-semibold text-slate-700 shadow-sm 
+    transition-all duration-300 
+    hover:bg-slate-50 hover:scale-[1.01]
+  ">
+    {/* Ícone do Google G-Logo simplificado */}
+    <svg className="h-5 w-5" viewBox="0 0 24 24">
+      <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.3 1.55-1.17 2.86-2.5 3.74v3.1h4.05c2.37-2.17 3.74-5.39 3.74-8.69z"/>
+      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-4.05-3.1c-1.12.75-2.55 1.19-3.88 1.19-2.99 0-5.52-2.01-6.42-4.73H1.32v3.2A11.996 11.996 0 0012 24z"/>
+      <path fill="#FBBC05" d="M5.58 14.45a7.21 7.21 0 010-4.9V6.35H1.32a11.983 11.983 0 000 11.3l4.26-3.2z"/>
+      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43A11.95 11.95 0 0012 0 11.996 11.996 0 001.32 6.35l4.26 3.2c.9-2.72 3.43-4.73 6.42-4.73z"/>
+    </svg>
+    Entrar com o Google
   </div>
 
-  {/* BOTÃO REAL DO GOOGLE */}
-  <div className="flex justify-center">
-    <div
-      id="googleButton"
-      className="min-h-[44px]"
-    />
-  </div>
-
-  <div className="mt-5 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
-    <ShieldCheck
-      size={14}
-      className="text-indigo-500"
-    />
-
-    Conexão segura via Google
-  </div>
+  {/* Botão Real do Google (Invisível, mas mantém a lógica do clique) */}
+  <div
+    id="googleButton"
+    className="h-14 w-full opacity-0 [&_iframe]:!w-full [&_iframe]:!h-14 cursor-pointer z-10"
+  />
 </div>
 
-            {(status === "loading-script" ||
-              status === "submitting") && (
-                <div className="mt-6">
-                  <Button
-                    disabled
-                    className="h-14 w-full rounded-2xl bg-slate-900 text-white"
-                  >
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-
-                    {status === "loading-script"
-                      ? "Preparando ambiente..."
-                      : "Autenticando..."}
-                  </Button>
-                </div>
-              )}
+{/* LOADING STATE */}
+{(status === "loading-script" || status === "submitting") && (
+  <div className="mt-6">
+    <Button
+      disabled
+      className="
+        h-14 w-full rounded-2xl bg-slate-900 text-base font-bold text-white
+        shadow-[0_10px_30px_rgba(15,23,42,0.1)] backdrop-blur-sm
+        transition-all duration-300
+      "
+    >
+      <Loader2 className="mr-3 h-5 w-5 animate-spin text-indigo-400" />
+      {status === "loading-script" ? "Preparando ambiente..." : "Autenticando..."}
+    </Button>
+  </div>
+)}
 
             {errorMessage && (
               <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">
