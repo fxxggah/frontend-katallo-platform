@@ -1,12 +1,17 @@
 "use client";
 
+import axios from "axios";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+
 import {
-  ArrowRight,
+  ArrowLeft,
   ShieldCheck,
   Sparkles,
   Store,
   Zap,
+  Loader2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +19,175 @@ import { Button } from "@/components/ui/button";
 import { KatalloFullLogo } from "@/components/brand/KatalloFullLogo";
 import { KatalloLogo } from "@/components/brand/KatalloLogo";
 
+import { authService } from "@/services/authService";
+
+const googleClientId =
+  process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ||
+  "711004756306-c1qb90c3ogkkjnsvcov86of25mmrhhjp.apps.googleusercontent.com";
+
 export default function LoginPage() {
+  const router = useRouter();
+
+  const searchParams = useSearchParams();
+
+  const redirect = searchParams.get("redirect");
+
+  const [status, setStatus] = useState<
+    "idle" | "loading-script" | "ready" | "submitting"
+  >("loading-script");
+
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const handleLogin = async (response: { credential?: string }) => {
+      if (!response?.credential) {
+        setErrorMessage(
+          "Não foi possível obter a credencial do Google."
+        );
+
+        setStatus("ready");
+
+        return;
+      }
+
+      try {
+        setStatus("submitting");
+
+        setErrorMessage("");
+
+        await authService.loginWithGoogle({
+          token: response.credential,
+        });
+
+        router.push(redirect || "/admin/stores");
+      } catch (err) {
+        console.error(err);
+
+        if (axios.isAxiosError(err) && !err.response) {
+          setErrorMessage(
+            "Não foi possível conectar ao backend. Verifique se a API está ativa."
+          );
+        } else {
+          setErrorMessage(
+            "Não foi possível concluir o login."
+          );
+        }
+
+        setStatus("ready");
+      }
+    };
+
+    const initGoogle = () => {
+      if (cancelled) return;
+
+      if (!window.google?.accounts?.id) {
+        setErrorMessage(
+          "Google Identity Services não disponível."
+        );
+
+        setStatus("idle");
+
+        return;
+      }
+
+      try {
+        window.google.accounts.id.initialize({
+          client_id: googleClientId,
+          callback: handleLogin,
+        });
+
+        const buttonElement =
+          document.getElementById("googleButton");
+
+        if (!buttonElement) {
+          setErrorMessage(
+            "Elemento do botão não encontrado."
+          );
+
+          setStatus("idle");
+
+          return;
+        }
+
+        buttonElement.innerHTML = "";
+
+        window.google.accounts.id.renderButton(
+          buttonElement,
+          {
+            theme: "filled_white",
+            size: "large",
+            text: "continue_with",
+            shape: "pill",
+            width: 360,
+            logo_alignment: "left",
+          }
+        );
+
+        setStatus("ready");
+      } catch (error) {
+        console.error(error);
+
+        setErrorMessage(
+          "Erro ao inicializar login Google."
+        );
+
+        setStatus("idle");
+      }
+    };
+
+    const existingScript =
+      document.querySelector<HTMLScriptElement>(
+        'script[src="https://accounts.google.com/gsi/client"]'
+      );
+
+    if (existingScript) {
+      if (window.google?.accounts?.id) {
+        initGoogle();
+      } else {
+        existingScript.addEventListener(
+          "load",
+          initGoogle,
+          {
+            once: true,
+          }
+        );
+      }
+
+      return;
+    }
+
+    const script = document.createElement("script");
+
+    script.src =
+      "https://accounts.google.com/gsi/client";
+
+    script.async = true;
+
+    script.defer = true;
+
+    script.onload = () => {
+      initGoogle();
+    };
+
+    script.onerror = () => {
+      if (!cancelled) {
+        setErrorMessage(
+          "Falha ao carregar o script de login do Google."
+        );
+
+        setStatus("idle");
+      }
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [router, redirect]);
+
   return (
     <main className="relative flex min-h-screen overflow-hidden bg-white">
       {/* BACKGROUND */}
@@ -44,8 +217,9 @@ export default function LoginPage() {
             </h1>
 
             <p className="mt-8 text-lg leading-relaxed text-slate-400">
-              Organize produtos, receba pedidos e transforme seu WhatsApp em um
-              fluxo profissional de vendas com a Katallo.
+              Organize produtos, receba pedidos e transforme seu
+              WhatsApp em um fluxo profissional de vendas com a
+              Katallo.
             </p>
           </div>
 
@@ -109,6 +283,7 @@ export default function LoginPage() {
 
       {/* RIGHT SIDE */}
       <section className="relative flex w-full items-center justify-center px-6 py-10 lg:w-[48%]">
+
         <div className="w-full max-w-md">
           {/* MOBILE LOGO */}
           <div className="mb-10 flex justify-center lg:hidden">
@@ -116,17 +291,15 @@ export default function LoginPage() {
           </div>
 
           {/* LOGIN CARD */}
-          <div className="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.08)] sm:p-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-black uppercase tracking-[0.25em] text-indigo-600">
-                  Bem-vindo
-                </p>
+          <div className="rounded-[2.5rem] border border-slate-200/80 bg-white/95 p-8 shadow-[0_40px_120px_-24px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:p-10">
+            <div>
+              <p className="text-sm font-black uppercase tracking-[0.25em] text-indigo-600">
+                Bem-vindo
+              </p>
 
-                <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-900">
-                  Entrar
-                </h2>
-              </div>
+              <h2 className="mt-3 text-4xl font-black tracking-tight text-slate-900">
+                Entrar
+              </h2>
             </div>
 
             <p className="mt-4 text-base leading-relaxed text-slate-500">
@@ -134,25 +307,74 @@ export default function LoginPage() {
             </p>
 
             {/* GOOGLE BUTTON */}
-            <div className="mt-10">
-              <Button className="group h-16 w-full rounded-2xl border border-slate-200 bg-white text-base font-bold text-slate-900 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50">
-                {/* GOOGLE ICON */}
-                <svg
-                  className="mr-3 h-5 w-5"
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                >
-                  <path
-                    fill="#EA4335"
-                    d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C17 3.3 14.7 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.8-.1-1.2H12z"
-                  />
-                </svg>
+            {/* GOOGLE BUTTON */}
+<div className="mt-10 overflow-hidden rounded-[2rem] border border-slate-200 bg-gradient-to-b from-white to-slate-50 p-6 shadow-[0_10px_40px_-15px_rgba(0,0,0,0.08)]">
+  
+  <div className="mb-5">
+    <div className="flex items-center gap-3">
+      <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <svg
+          className="h-5 w-5"
+          viewBox="0 0 24 24"
+        >
+          <path
+            fill="#EA4335"
+            d="M12 10.2v3.9h5.5c-.2 1.3-1.5 3.9-5.5 3.9-3.3 0-6-2.7-6-6s2.7-6 6-6c1.9 0 3.2.8 3.9 1.5l2.7-2.6C17 3.3 14.7 2.3 12 2.3 6.9 2.3 2.8 6.4 2.8 11.5S6.9 20.7 12 20.7c6.9 0 9.1-4.8 9.1-7.3 0-.5 0-.8-.1-1.2H12z"
+          />
+        </svg>
+      </div>
 
-                Continuar com Google
+      <div>
+        <p className="text-sm font-black text-slate-900">
+          Entrar com Google
+        </p>
 
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-              </Button>
-            </div>
+        <p className="text-xs text-slate-500">
+          Login rápido e seguro
+        </p>
+      </div>
+    </div>
+  </div>
+
+  {/* BOTÃO REAL DO GOOGLE */}
+  <div className="flex justify-center">
+    <div
+      id="googleButton"
+      className="min-h-[44px]"
+    />
+  </div>
+
+  <div className="mt-5 flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
+    <ShieldCheck
+      size={14}
+      className="text-indigo-500"
+    />
+
+    Conexão segura via Google
+  </div>
+</div>
+
+            {(status === "loading-script" ||
+              status === "submitting") && (
+                <div className="mt-6">
+                  <Button
+                    disabled
+                    className="h-14 w-full rounded-2xl bg-slate-900 text-white"
+                  >
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+
+                    {status === "loading-script"
+                      ? "Preparando ambiente..."
+                      : "Autenticando..."}
+                  </Button>
+                </div>
+              )}
+
+            {errorMessage && (
+              <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">
+                {errorMessage}
+              </div>
+            )}
 
             {/* SECURITY */}
             <div className="mt-8 rounded-3xl border border-indigo-100 bg-indigo-50/70 p-5">
@@ -167,8 +389,9 @@ export default function LoginPage() {
                   </h3>
 
                   <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                    Utilizamos autenticação via Google para oferecer uma
-                    experiência rápida, moderna e protegida.
+                    Utilizamos autenticação via Google para
+                    oferecer uma experiência rápida, moderna e
+                    protegida.
                   </p>
                 </div>
               </div>
@@ -178,8 +401,8 @@ export default function LoginPage() {
           {/* TERMS */}
           <div className="mt-8 text-center">
             <p className="text-sm leading-relaxed text-slate-400">
-              Ao continuar, você concorda com os Termos de Uso e Política de
-              Privacidade da Katallo.
+              Ao continuar, você concorda com os Termos de Uso e
+              Política de Privacidade da Katallo.
             </p>
           </div>
         </div>

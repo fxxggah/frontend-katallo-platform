@@ -56,6 +56,7 @@ const Hero = () => (
 
         {/* BUTTONS */}
         <div className="flex w-full flex-col items-center justify-center gap-4 sm:flex-row">
+          <a href="/login">
           <button
             className="
               group flex w-full items-center justify-center gap-2
@@ -69,293 +70,273 @@ const Hero = () => (
               sm:w-auto
             "
           >
-            Começar Gratuitamente
+            Começar Agora
 
             <ArrowRight className="h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" />
           </button>
+          </a>
 
-          <button
-            className="
-              w-full rounded-2xl border border-slate-200
-              bg-white/90 px-8 py-5
-              text-lg font-bold text-slate-700
-              backdrop-blur-xl transition-all duration-300
-              hover:border-indigo-200
-              hover:text-indigo-600
-              sm:w-auto
-            "
-          >
-            Ver demonstração
-          </button>
         </div>
 
         <div className="relative mt-24 w-full max-w-7xl">
-  {/* PREMIUM GLOW */}
-  <div className="absolute -inset-10 rounded-[4rem] bg-gradient-to-r from-indigo-500/20 via-violet-500/10 to-indigo-500/20 blur-[120px]" />
+          {/* PREMIUM GLOW */}
+          <div className="absolute -inset-10 rounded-[4rem] bg-gradient-to-r from-indigo-500/20 via-violet-500/10 to-indigo-500/20 blur-[120px]" />
 
-  {/* MAIN WINDOW */}
-  <div
-    className="
+          {/* MAIN WINDOW */}
+          <div
+            className="
       relative overflow-hidden rounded-[2.8rem]
       border border-white/30
       bg-white/70
       shadow-[0_40px_120px_rgba(15,23,42,0.18)]
       backdrop-blur-2xl
     "
-  >
-    {/* LIGHT EFFECT */}
-    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(139,92,246,0.08),transparent_35%)]" />
+          >
+            {/* LIGHT EFFECT */}
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.08),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(139,92,246,0.08),transparent_35%)]" />
 
-    {/* TOPBAR */}
-    <div
-      className="
+            {/* TOPBAR */}
+            <div
+              className="
         relative flex items-center justify-between
         border-b border-slate-200/70
         bg-white/75 px-4 py-4
         backdrop-blur-xl md:px-8
       "
-    >
-      {/* LEFT */}
-      <div className="flex items-center gap-4">
-        <div className="flex gap-1.5">
-          <div className="h-3 w-3 rounded-full bg-red-400" />
-          <div className="h-3 w-3 rounded-full bg-yellow-400" />
-          <div className="h-3 w-3 rounded-full bg-green-400" />
-        </div>
+            >
+              {/* LEFT */}
+              <div className="flex items-center gap-4">
+                <div className="flex gap-1.5">
+                  <div className="h-3 w-3 rounded-full bg-red-400" />
+                  <div className="h-3 w-3 rounded-full bg-yellow-400" />
+                  <div className="h-3 w-3 rounded-full bg-green-400" />
+                </div>
 
-        <div className="hidden items-center gap-3 rounded-full border border-slate-200 bg-slate-100/80 px-4 py-2 md:flex">
-          <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="hidden items-center gap-3 rounded-full border border-slate-200 bg-slate-100/80 px-4 py-2 md:flex">
+                  <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
 
-          <span className="text-xs font-semibold text-slate-500">
-            painel.katallo.com
-          </span>
-        </div>
-      </div>
+                  <span className="text-xs font-semibold text-slate-500">
+                    painel.katallo.com
+                  </span>
+                </div>
+              </div>
 
-      {/* RIGHT */}
-      <div className="flex items-center gap-3">
-        {/* Search */}
-        <div className="hidden h-11 w-52 items-center rounded-2xl border border-slate-200 bg-white px-4 lg:flex">
-          <div className="h-3 w-24 rounded-full bg-slate-200" />
-        </div>
+              {/* RIGHT */}
+              <div className="flex items-center gap-3">
+                {/* Search */}
+                <div className="hidden h-11 w-52 items-center rounded-2xl border border-slate-200 bg-white px-4 lg:flex">
+                  <div className="h-3 w-24 rounded-full bg-slate-200" />
+                </div>
 
-        {/* User */}
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg">
-            <Store className="h-5 w-5" />
-          </div>
+                {/* User */}
+                <div className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-3 py-2 shadow-sm">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg">
+                    <Store className="h-5 w-5" />
+                  </div>
 
-          <div className="hidden text-left md:block">
-            <p className="text-xs font-black text-slate-900">
-              Katallo Store
-            </p>
+                  <div className="hidden text-left md:block">
+                    <p className="text-xs font-black text-slate-900">
+                      Katallo Store
+                    </p>
 
-            <p className="text-[11px] text-slate-500">
-              Premium Plan
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
+                    <p className="text-[11px] text-slate-500">
+                      Premium Plan
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-    {/* BODY */}
-    <div className="grid gap-6 bg-[#f8fafc] p-4 md:grid-cols-[260px_1fr] md:p-6">
-      {/* SIDEBAR */}
-      <div
-        className="
+            {/* BODY */}
+            <div className="grid gap-6 bg-[#f8fafc] p-4 md:grid-cols-[260px_1fr] md:p-6">
+              {/* SIDEBAR */}
+              <div
+                className="
           hidden rounded-[2rem]
           border border-slate-200/70
           bg-white/80 p-5
           backdrop-blur-xl md:block
         "
-      >
-        {/* STORE */}
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/30">
-            <Store className="h-6 w-6" />
-          </div>
+              >
+                {/* STORE */}
+                <div className="mb-8 flex items-center gap-3">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/30">
+                    <Store className="h-6 w-6" />
+                  </div>
 
-          <div>
-            <p className="text-sm font-black text-slate-900">
-              Minha Loja
-            </p>
+                  <div>
+                    <p className="text-sm font-black text-slate-900">
+                      Minha Loja
+                    </p>
 
-            <p className="text-xs text-slate-500">
-              Painel Administrativo
-            </p>
-          </div>
-        </div>
+                    <p className="text-xs text-slate-500">
+                      Painel Administrativo
+                    </p>
+                  </div>
+                </div>
 
-        {/* MENU */}
-        <div className="space-y-2">
-          {[
-            {
-              name: "Dashboard",
-              active: true,
-            },
-            {
-              name: "Produtos",
-            },
-            {
-              name: "Pedidos",
-            },
-            {
-              name: "Categorias",
-            },
-            {
-              name: "Clientes",
-            },
-            {
-              name: "Configurações",
-            },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className={`
+                {/* MENU */}
+                <div className="space-y-2">
+                  {[
+                    {
+                      name: "Dashboard",
+                      active: true,
+                    },
+                    {
+                      name: "Produtos",
+                    },
+                    {
+                      name: "Categorias",
+                    },
+                    {
+                      name: "Configurações",
+                    },
+                  ].map((item, index) => (
+                    <div
+                      key={index}
+                      className={`
                 flex cursor-pointer items-center gap-3
                 rounded-2xl px-4 py-3
                 text-sm font-semibold transition-all duration-300
-                ${
-                  item.active
-                    ? "bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/20"
-                    : "text-slate-500 hover:bg-slate-100"
-                }
+                ${item.active
+                          ? "bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-lg shadow-indigo-500/20"
+                          : "text-slate-500 hover:bg-slate-100"
+                        }
               `}
-            >
-              <div
-                className={`h-2 w-2 rounded-full ${
-                  item.active ? "bg-white" : "bg-slate-300"
-                }`}
-              />
+                    >
+                      <div
+                        className={`h-2 w-2 rounded-full ${item.active ? "bg-white" : "bg-slate-300"
+                          }`}
+                      />
 
-              {item.name}
-            </div>
-          ))}
-        </div>
+                      {item.name}
+                    </div>
+                  ))}
+                </div>
 
-        {/* BOTTOM CARD */}
-        <div
-          className="
+                {/* BOTTOM CARD */}
+                <div
+                  className="
             mt-8 rounded-[1.8rem]
             bg-gradient-to-br from-slate-900 to-slate-800
             p-5 text-white
           "
-        >
-          <div className="mb-4 flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
-              <Zap className="h-5 w-5 text-indigo-300" />
-            </div>
+                >
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10">
+                      <Zap className="h-5 w-5 text-indigo-300" />
+                    </div>
 
-            <div>
-              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                Performance
-              </p>
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                        Conversão
+                      </p>
 
-              <h4 className="text-2xl font-black">
-                +32%
-              </h4>
-            </div>
-          </div>
+                      <h4 className="text-2xl font-black">
+                        +32%
+                      </h4>
+                    </div>
+                  </div>
 
-          <p className="text-sm leading-relaxed text-slate-300">
-            Seu catálogo está convertendo mais esta semana.
-          </p>
-        </div>
-      </div>
+                  <p className="text-sm leading-relaxed text-slate-300">
+                    Seu catálogo está convertendo mais esta semana.
+                  </p>
+                </div>
+              </div>
 
-      {/* MAIN CONTENT */}
-      <div className="space-y-6">
-        {/* HERO CARD */}
-        <div
-          className="
+              {/* MAIN CONTENT */}
+              <div className="space-y-6">
+                {/* HERO CARD */}
+                <div
+                  className="
             relative overflow-hidden rounded-[2rem]
             bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-700
             p-8 text-white shadow-2xl
           "
-        >
-          {/* Background Glow */}
-          <div className="absolute top-0 right-0 h-64 w-64 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/10 blur-3xl" />
+                >
+                  {/* Background Glow */}
+                  <div className="absolute top-0 right-0 h-64 w-64 translate-x-1/3 -translate-y-1/3 rounded-full bg-white/10 blur-3xl" />
 
-          <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur-xl">
-                <div className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
-                Loja Online
-              </div>
+                  <div className="relative z-10 flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                      <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.2em] backdrop-blur-xl">
+                        <div className="h-2 w-2 rounded-full bg-emerald-300 animate-pulse" />
+                        Loja Online
+                      </div>
 
-              <h2 className="mb-3 text-3xl font-black md:text-5xl">
-                Bem-vindo de volta 👋
-              </h2>
+                      <h2 className="mb-3 text-3xl font-black md:text-5xl">
+                        Bem-vindo de volta 👋
+                      </h2>
 
-              <p className="max-w-xl text-base leading-relaxed text-indigo-100 md:text-lg">
-                Seus produtos estão recebendo mais visitas hoje.
-                Continue aumentando sua conversão com uma experiência premium.
-              </p>
-            </div>
+                      <p className="max-w-xl text-base leading-relaxed text-indigo-100 md:text-lg">
+                        Seus produtos estão recebendo mais visitas hoje.
+                        Continue aumentando sua conversão com uma experiência premium.
+                      </p>
+                    </div>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                {
-                  label: "Visitas",
-                  value: "12.4k",
-                },
-                {
-                  label: "Produtos",
-                  value: "324",
-                },
-                {
-                  label: "Conversão",
-                  value: "18%",
-                },
-                {
-                  label: "Categorias",
-                  value: "124",
-                },
-              ].map((stat, index) => (
-                <div
-                  key={index}
-                  className="
+                    {/* Quick Stats */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        {
+                          label: "Visitas",
+                          value: "12.4k",
+                        },
+                        {
+                          label: "Produtos",
+                          value: "324",
+                        },
+                        {
+                          label: "Conversão",
+                          value: "18%",
+                        },
+                        {
+                          label: "Categorias",
+                          value: "124",
+                        },
+                      ].map((stat, index) => (
+                        <div
+                          key={index}
+                          className="
                     rounded-2xl border border-white/10
                     bg-white/10 p-4
                     backdrop-blur-xl
                   "
-                >
-                  <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-indigo-100">
-                    {stat.label}
-                  </p>
+                        >
+                          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-indigo-100">
+                            {stat.label}
+                          </p>
 
-                  <h4 className="text-2xl font-black">
-                    {stat.value}
-                  </h4>
+                          <h4 className="text-2xl font-black">
+                            {stat.value}
+                          </h4>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
-        {/* TOP CARDS */}
-        <div className="grid gap-4 md:grid-cols-3">
-          {[
-            {
-              title: "Categorias",
-              value: "+124",
-              icon: <ShoppingBag className="h-5 w-5" />,
-            },
-            {
-              title: "Conversão",
-              value: "18%",
-              icon: <TrendingUp className="h-5 w-5" />,
-            },
-            {
-              title: "Produtos",
-              value: "324",
-              icon: <Store className="h-5 w-5" />,
-            },
-          ].map((card, index) => (
-            <div
-              key={index}
-              className="
+                {/* TOP CARDS */}
+                <div className="grid gap-4 md:grid-cols-3">
+                  {[
+                    {
+                      title: "Categorias",
+                      value: "+124",
+                      icon: <ShoppingBag className="h-5 w-5" />,
+                    },
+                    {
+                      title: "Conversão",
+                      value: "18%",
+                      icon: <TrendingUp className="h-5 w-5" />,
+                    },
+                    {
+                      title: "Produtos",
+                      value: "324",
+                      icon: <Store className="h-5 w-5" />,
+                    },
+                  ].map((card, index) => (
+                    <div
+                      key={index}
+                      className="
                 rounded-[2rem]
                 border border-slate-200/70
                 bg-white/90 p-5
@@ -363,59 +344,59 @@ const Hero = () => (
                 transition-all duration-300
                 hover:-translate-y-1 hover:shadow-xl
               "
-            >
-              <div className="mb-5 flex items-center justify-between">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                  {card.icon}
+                    >
+                      <div className="mb-5 flex items-center justify-between">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                          {card.icon}
+                        </div>
+
+                        <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                          <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                          Online
+                        </div>
+                      </div>
+
+                      <p className="mb-1 text-sm font-medium text-slate-500">
+                        {card.title}
+                      </p>
+
+                      <h3 className="text-3xl font-black text-slate-900">
+                        {card.value}
+                      </h3>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-                  <div className="h-2 w-2 rounded-full bg-emerald-400" />
-                  Online
-                </div>
-              </div>
-
-              <p className="mb-1 text-sm font-medium text-slate-500">
-                {card.title}
-              </p>
-
-              <h3 className="text-3xl font-black text-slate-900">
-                {card.value}
-              </h3>
-            </div>
-          ))}
-        </div>
-
-        {/* PRODUCTS */}
-        <div
-          className="
+                {/* PRODUCTS */}
+                <div
+                  className="
             rounded-[2rem]
             border border-slate-200/70
             bg-white/90 p-6
             backdrop-blur-xl
           "
-        >
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-black text-slate-900">
-                Produtos em destaque
-              </h3>
+                >
+                  <div className="mb-6 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-black text-slate-900">
+                        Produtos em destaque
+                      </h3>
 
-              <p className="text-sm text-slate-500">
-                Produtos mais visualizados hoje
-              </p>
-            </div>
+                      <p className="text-sm text-slate-500">
+                        Produtos mais visualizados hoje
+                      </p>
+                    </div>
 
-            <div className="rounded-2xl bg-indigo-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">
-              Tempo real
-            </div>
-          </div>
+                    <div className="rounded-2xl bg-indigo-50 px-4 py-2 text-xs font-bold uppercase tracking-[0.15em] text-indigo-600">
+                      Tempo real
+                    </div>
+                  </div>
 
-          <div className="grid gap-4 md:grid-cols-3">
-            {[1, 2, 3].map((item) => (
-              <div
-                key={item}
-                className="
+                  <div className="grid gap-4 md:grid-cols-3">
+                    {[1, 2, 3].map((item) => (
+                      <div
+                        key={item}
+                        className="
                   group rounded-[1.8rem]
                   border border-slate-200
                   bg-white p-4
@@ -423,105 +404,101 @@ const Hero = () => (
                   hover:-translate-y-1
                   hover:shadow-xl
                 "
-              >
-                {/* IMAGE */}
-                <div className="relative mb-4 aspect-square overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-slate-100 to-slate-200">
-                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.2),transparent_50%)]" />
+                      >
+                        {/* IMAGE */}
+                        <div className="relative mb-4 aspect-square overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-slate-100 to-slate-200">
+                          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(99,102,241,0.2),transparent_50%)]" />
+                        </div>
 
-                  <div className="absolute bottom-3 left-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-slate-900 backdrop-blur-xl">
-                    Premium
+                        {/* CONTENT */}
+                        <div className="mb-2 h-4 w-2/3 rounded-full bg-slate-200" />
+
+                        <div className="mb-5 h-3 w-1/2 rounded-full bg-slate-100" />
+
+                        <div className="flex items-center justify-between">
+                          <div className="h-8 w-20 rounded-xl bg-indigo-100" />
+
+                          <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
+                            <div className="h-2 w-2 rounded-full bg-emerald-400" />
+                            Em estoque
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* CONTENT */}
-                <div className="mb-2 h-4 w-2/3 rounded-full bg-slate-200" />
+                {/* BOTTOM */}
+                <div className="grid gap-4 lg:grid-cols-2">
+                  {/* Visitas */}
+                  <div className="rounded-[2rem] border border-slate-200/70 bg-white/90 p-6">
+                    <div className="mb-6 flex items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
+                        <Zap className="h-5 w-5" />
+                      </div>
 
-                <div className="mb-5 h-3 w-1/2 rounded-full bg-slate-100" />
+                      <div>
+                        <h4 className="font-black text-slate-900">
+                          Visitas
+                        </h4>
 
-                <div className="flex items-center justify-between">
-                  <div className="h-8 w-20 rounded-xl bg-indigo-100" />
+                        <p className="text-sm text-slate-500">
+                          Últimos 7 dias
+                        </p>
+                      </div>
+                    </div>
 
-                  <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-600">
-                    <div className="h-2 w-2 rounded-full bg-emerald-400" />
-                    Ativo
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* BOTTOM */}
-        <div className="grid gap-4 lg:grid-cols-2">
-          {/* PERFORMANCE */}
-          <div className="rounded-[2rem] border border-slate-200/70 bg-white/90 p-6">
-            <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600">
-                <Zap className="h-5 w-5" />
-              </div>
-
-              <div>
-                <h4 className="font-black text-slate-900">
-                  Performance
-                </h4>
-
-                <p className="text-sm text-slate-500">
-                  Últimos 7 dias
-                </p>
-              </div>
-            </div>
-
-            <div className="flex h-44 items-end gap-3">
-              {[35, 55, 45, 80, 65, 100, 75].map((height, index) => (
-                <div
-                  key={index}
-                  className="
+                    <div className="flex h-44 items-end gap-3">
+                      {[35, 55, 45, 80, 65, 100, 75].map((height, index) => (
+                        <div
+                          key={index}
+                          className="
                     flex-1 rounded-t-[1rem]
                     bg-gradient-to-t from-indigo-500 to-violet-500
                     shadow-lg shadow-indigo-500/20
                   "
-                  style={{
-                    height: `${height}%`,
-                  }}
-                />
-              ))}
+                          style={{
+                            height: `${height}%`,
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  {/* FLOATING CARD */}
-  <div
-    className="
+          {/* FLOATING CARD */}
+          <div
+            className="
       absolute -right-6 -bottom-6 hidden
       rounded-[2rem] border border-white/30
       bg-white/80 p-5 shadow-2xl
       backdrop-blur-2xl lg:block
     "
-  >
-    <div className="mb-3 flex items-center gap-3">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-green-400 text-white shadow-lg">
-        <TrendingUp className="h-5 w-5" />
-      </div>
+          >
+            <div className="mb-3 flex items-center gap-3">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-green-400 text-white shadow-lg">
+                <TrendingUp className="h-5 w-5" />
+              </div>
 
-      <div>
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-          Conversão
-        </p>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                  Conversão
+                </p>
 
-        <h4 className="text-2xl font-black text-slate-900">
-          +32%
-        </h4>
-      </div>
-    </div>
+                <h4 className="text-2xl font-black text-slate-900">
+                  +32%
+                </h4>
+              </div>
+            </div>
 
-    <p className="max-w-[180px] text-sm font-medium leading-relaxed text-slate-500">
-      Seu catálogo vende mais com uma experiência premium.
-    </p>
-  </div>
-</div>
+            <p className="max-w-[180px] text-sm font-medium leading-relaxed text-slate-500">
+              Seu catálogo vende mais com uma experiência premium.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -739,19 +716,17 @@ export default function HomePage() {
     <div className="flex min-h-screen flex-col bg-white font-sans">
       {/* HEADER */}
       <header
-        className={`fixed top-0 left-0 z-50 w-full transition-all duration-500 ${
-          scrolled ? "py-3" : "py-5"
-        }`}
+        className={`fixed top-0 left-0 z-50 w-full transition-all duration-500 ${scrolled ? "py-3" : "py-5"
+          }`}
       >
         <div className="container mx-auto px-4">
           <div
             className={`
               relative mx-auto flex items-center justify-between
               rounded-[28px] border transition-all duration-500
-              ${
-                scrolled
-                  ? "border-white/20 bg-white/75 px-4 py-3 shadow-[0_10px_50px_rgba(0,0,0,0.08)] backdrop-blur-2xl md:px-6 md:py-4"
-                  : "border-white/10 bg-white/40 px-4 py-4 backdrop-blur-xl md:px-8 md:py-5"
+              ${scrolled
+                ? "border-white/20 bg-white/75 px-4 py-3 shadow-[0_10px_50px_rgba(0,0,0,0.08)] backdrop-blur-2xl md:px-6 md:py-4"
+                : "border-white/10 bg-white/40 px-4 py-4 backdrop-blur-xl md:px-8 md:py-5"
               }
             `}
           >
@@ -877,7 +852,7 @@ export default function HomePage() {
                 Pronta para elevar o <br />
                 nível do seu negócio?
               </h2>
-
+              <a href="/login">
               <button
                 className="
                   relative z-10 rounded-[2rem]
@@ -891,9 +866,9 @@ export default function HomePage() {
                   md:px-12 md:py-7 md:text-2xl
                 "
               >
-                Começar agora grátis
+                Começar agora mesmo!
               </button>
-
+              </a>
               <p className="relative z-10 mt-10 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
                 Sem cartão de crédito • Setup em 2 minutos
               </p>

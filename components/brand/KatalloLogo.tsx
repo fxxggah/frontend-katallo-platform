@@ -9,7 +9,7 @@ type KatalloLogoProps = {
 };
 
 export function KatalloLogo({
-  size = 100,
+  size = 50,
   clickable = true,
   priority = false,
   className = "",
