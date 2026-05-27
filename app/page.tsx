@@ -44,7 +44,7 @@ const Hero = () => (
         <h1 className="mb-8 text-5xl font-black leading-[0.95] tracking-tight text-slate-900 md:text-7xl lg:text-8xl">
           Sua loja merece uma <br />
           <span className="bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-500 bg-clip-text text-transparent">
-            presença diginal.
+            presença digital.
           </span>
         </h1>
 
