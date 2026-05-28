@@ -2,21 +2,19 @@
 // TEMPLATES DISPONÍVEIS
 // ======================================================
 
-// Quando criar um novo template,
-// adicione aqui.
-
 export type StoreTemplate =
   | "MINIMAL";
 
 export type StoreRequest = {
   name: string;
+
   logo?: string;
   favicon?: string;
+
   whatsappNumber?: string;
   instagram?: string;
   facebook?: string;
 
-  // Template visual da loja
   template?: StoreTemplate;
 
   street?: string;
@@ -24,11 +22,13 @@ export type StoreRequest = {
   city?: string;
   state?: string;
   country?: string;
+
   googleMapsLink?: string;
 };
 
 export type StoreResponse = {
   id: number;
+
   name: string;
   slug: string;
 
@@ -48,6 +48,7 @@ export type StoreResponse = {
   city?: string;
   state?: string;
   country?: string;
+
   googleMapsLink?: string;
 
   createdAt: string;

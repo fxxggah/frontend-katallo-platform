@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { GbGamesLogo } from "./GbGamesLogo";
 import type { StoreResponse } from "@/types";
-import { ShoppingCart, Gamepad2 } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 
 type GbGamesNavbarProps = {
@@ -46,20 +47,7 @@ export function GbGamesNavbar({ store }: GbGamesNavbarProps) {
               <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#5A00B1] to-[#7B2CFF] shadow-[0_0_45px_rgba(123,44,255,0.45)] transition-all duration-300 group-hover:scale-105">
                 <div className="absolute inset-0 bg-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-                <Gamepad2
-                  size={22}
-                  className="relative z-10 text-white"
-                />
-              </div>
-
-              <div className="leading-tight">
-                <p className="bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-lg font-black tracking-tight text-transparent">
-                  GB GAMES
-                </p>
-
-                <span className="text-[10px] uppercase tracking-[0.35em] text-zinc-500">
-                  Gamer Store
-                </span>
+                <GbGamesLogo store={store} />
               </div>
             </Link>
 
