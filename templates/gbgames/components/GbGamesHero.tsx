@@ -11,7 +11,7 @@ export function GbGamesHero() {
             <div className="h-2 w-2 rounded-full bg-[#A855F7]" />
 
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">
-              Gamer Premium Experience
+              Sua nova loja de games e informática de Botucatu
             </span>
           </div>
 

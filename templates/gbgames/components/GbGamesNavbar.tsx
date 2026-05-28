@@ -37,20 +37,15 @@ export function GbGamesNavbar({ store }: GbGamesNavbarProps) {
               : "bg-[#09090B]/35 shadow-[0_0_30px_rgba(0,0,0,0.20)] backdrop-blur-xl"
           }`}
         >
+          {/* Brilho radial roxo no canto superior direito */}
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(123,44,255,0.18),transparent_35%)]" />
 
           <div className="relative flex items-center justify-between px-6 py-4">
-            <Link
-              href={`/${store.slug}`}
-              className="group flex items-center gap-4"
-            >
-              <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#5A00B1] to-[#7B2CFF] shadow-[0_0_45px_rgba(123,44,255,0.45)] transition-all duration-300 group-hover:scale-105">
-                <div className="absolute inset-0 bg-white/10 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+            
+            {/* Lado Esquerdo: Componente da Logo ajustado */}
+            <GbGamesLogo store={store} />
 
-                <GbGamesLogo store={store} />
-              </div>
-            </Link>
-
+            {/* Lado Direito: Navegação e Carrinho */}
             <nav className="flex items-center gap-3">
               <Link
                 href={`/${store.slug}`}
@@ -75,6 +70,7 @@ export function GbGamesNavbar({ store }: GbGamesNavbarProps) {
                 </span>
               </Link>
             </nav>
+
           </div>
         </div>
       </div>
