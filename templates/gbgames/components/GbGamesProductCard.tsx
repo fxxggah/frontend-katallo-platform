@@ -28,7 +28,11 @@ export function GbGamesProductCard({
   return (
     <Link
       href={`/${store.slug}/product/${product.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-[30px] border border-white/10 bg-[#111118] transition-all duration-500 hover:-translate-y-2 hover:border-[#7B2CFF]/40 hover:shadow-[0_0_60px_rgba(123,44,255,0.2)]"
+      className={`group relative flex flex-col overflow-hidden rounded-[30px] border transition-all duration-500 ${
+        product.inStock
+          ? "border-white/10 bg-[#111118] hover:-translate-y-2 hover:border-[#7B2CFF]/40 hover:shadow-[0_0_60px_rgba(123,44,255,0.2)]"
+          : "border-red-500/20 bg-[#111118]/70 opacity-80"
+      }`}
     >
       <div className="relative aspect-[4/5] overflow-hidden">
         {optimizedFirstImage ? (
@@ -63,12 +67,20 @@ export function GbGamesProductCard({
           Gamer
         </div>
 
-        <button
-          type="button"
-          className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white opacity-0 backdrop-blur-xl transition-all duration-300 group-hover:opacity-100 hover:bg-[#7B2CFF]/20"
-        >
-          <ShoppingCart size={18} />
-        </button>
+        {!product.inStock && (
+          <div className="absolute right-4 top-4 rounded-full border border-red-500/40 bg-red-500/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-red-200 backdrop-blur-xl">
+            Esgotado
+          </div>
+        )}
+
+        {product.inStock && (
+          <button
+            type="button"
+            className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10 text-white opacity-0 backdrop-blur-xl transition-all duration-300 group-hover:opacity-100 hover:bg-[#7B2CFF]/20"
+          >
+            <ShoppingCart size={18} />
+          </button>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-5">
@@ -87,6 +99,14 @@ export function GbGamesProductCard({
             </span>
           )}
         </div>
+
+        {!product.inStock && (
+          <div className="mt-4">
+            <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-red-300">
+              Produto indisponível
+            </span>
+          </div>
+        )}
       </div>
     </Link>
   );

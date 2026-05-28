@@ -37,6 +37,8 @@ export function GbGamesProductTemplate({
 
   const images = product.images ?? [];
 
+  const isOutOfStock = !product.inStock;
+
   const selectedImage = useMemo(() => {
     return images[selectedImageIndex]?.imageUrl ?? null;
   }, [images, selectedImageIndex]);
@@ -49,22 +51,36 @@ export function GbGamesProductTemplate({
     (item) => item.productId === product.id
   );
 
+  function handleAddToCart() {
+    if (isOutOfStock) return;
+
+    addToCart(product, 1);
+  }
+
   return (
     <div className="min-h-screen bg-[#09090B] text-white">
       <GbGamesNavbar store={store} />
 
       <main className="mx-auto grid max-w-7xl gap-12 px-6 py-14 lg:grid-cols-2">
         <div>
-          <div className="overflow-hidden rounded-[32px] border border-white/10 bg-[#111118]">
+          <div className="relative overflow-hidden rounded-[32px] border border-white/10 bg-[#111118]">
             {optimizedImage ? (
               <img
                 src={optimizedImage}
                 alt={product.name}
-                className="h-full w-full object-cover"
+                className={`h-full w-full object-cover ${
+                  isOutOfStock ? "grayscale opacity-70" : ""
+                }`}
               />
             ) : (
               <div className="flex aspect-square items-center justify-center text-zinc-500">
                 Sem imagem
+              </div>
+            )}
+
+            {isOutOfStock && (
+              <div className="absolute left-6 top-6 rounded-full border border-red-500/40 bg-red-500/20 px-4 py-2 text-[11px] font-black uppercase tracking-[0.3em] text-red-200 backdrop-blur-xl">
+                Esgotado
               </div>
             )}
           </div>
@@ -75,7 +91,7 @@ export function GbGamesProductTemplate({
                 <button
                   key={image.id}
                   onClick={() => setSelectedImageIndex(index)}
-                  className={`overflow-hidden rounded-2xl border ${
+                  className={`overflow-hidden rounded-2xl border transition-all ${
                     selectedImageIndex === index
                       ? "border-[#7B2CFF]"
                       : "border-white/10"
@@ -84,7 +100,9 @@ export function GbGamesProductTemplate({
                   <img
                     src={image.imageUrl}
                     alt={product.name}
-                    className="h-24 w-24 object-cover"
+                    className={`h-24 w-24 object-cover ${
+                      isOutOfStock ? "grayscale opacity-70" : ""
+                    }`}
                   />
                 </button>
               ))}
@@ -121,19 +139,35 @@ export function GbGamesProductTemplate({
             </p>
           )}
 
-          <button
-            onClick={() => addToCart(product, 1)}
-            className="mt-10 flex w-full items-center justify-center gap-3 rounded-[24px] bg-gradient-to-r from-[#5A00B1] to-[#7B2CFF] px-8 py-5 text-sm font-black uppercase tracking-[0.25em] text-white shadow-[0_0_50px_rgba(123,44,255,0.35)] transition-all duration-300 hover:scale-[1.02]"
-          >
-            <ShoppingCart size={20} />
+          {isOutOfStock ? (
+            <button
+              type="button"
+              disabled
+              className="mt-10 flex w-full cursor-not-allowed items-center justify-center gap-3 rounded-[24px] bg-zinc-700 px-8 py-5 text-sm font-black uppercase tracking-[0.25em] text-zinc-300"
+            >
+              Esgotado
+            </button>
+          ) : (
+            <button
+              onClick={handleAddToCart}
+              className="mt-10 flex w-full items-center justify-center gap-3 rounded-[24px] bg-gradient-to-r from-[#5A00B1] to-[#7B2CFF] px-8 py-5 text-sm font-black uppercase tracking-[0.25em] text-white shadow-[0_0_50px_rgba(123,44,255,0.35)] transition-all duration-300 hover:scale-[1.02]"
+            >
+              <ShoppingCart size={20} />
 
-            Adicionar ao Carrinho
-          </button>
+              Adicionar ao Carrinho
+            </button>
+          )}
 
-          {isInCart && (
+          {isInCart && !isOutOfStock && (
             <div className="mt-4 flex items-center gap-2 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm font-semibold text-emerald-400">
               <Check size={16} />
               Produto já está no carrinho
+            </div>
+          )}
+
+          {isOutOfStock && (
+            <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-center text-sm font-semibold text-red-300">
+              Este produto está indisponível no momento.
             </div>
           )}
         </div>
