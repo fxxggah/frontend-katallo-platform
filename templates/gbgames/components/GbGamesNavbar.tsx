@@ -30,15 +30,13 @@ export function GbGamesNavbar({ store }: GbGamesNavbarProps) {
     <header className="fixed left-0 top-0 z-50 w-full">
       <div className="mx-auto max-w-7xl px-4 pt-4">
         <div
-          className={`relative overflow-hidden border border-white/10 transition-all duration-500 ${
+          className={`relative overflow-hidden rounded-[28px] border border-white/10 transition-all duration-500 ${
             isScrolled
-              ? "rounded-[28px] bg-[#09090B]/75 shadow-[0_0_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl"
-              : "rounded-none border-transparent bg-transparent shadow-none backdrop-blur-0"
+              ? "bg-[#09090B]/75 shadow-[0_0_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl"
+              : "bg-[#09090B]/35 shadow-[0_0_30px_rgba(0,0,0,0.20)] backdrop-blur-xl"
           }`}
         >
-          {isScrolled && (
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(123,44,255,0.18),transparent_35%)]" />
-          )}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(123,44,255,0.18),transparent_35%)]" />
 
           <div className="relative flex items-center justify-between px-6 py-4">
             <Link
