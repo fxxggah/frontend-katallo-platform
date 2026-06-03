@@ -2,16 +2,14 @@ import type { StoreTemplateModule } from "./types";
 
 import { minimalTemplate } from "../minimal";
 import { gbGamesTemplate } from "../gbgames";
-
-// Aqui você adiciona novos templates futuramente
-// import { clienteATemplate } from "../clients/cliente-a";
+import { esterTemplate } from "../clients/ester";
+// adicione novos templates aqui
 
 const templateRegistry: Record<string, StoreTemplateModule> = {
   MINIMAL: minimalTemplate,
-
   GBGAMES: gbGamesTemplate,
-  // exemplos futuros:
-  // "cliente-a": clienteATemplate,
+  ESTER: esterTemplate,
+  // adicione novos templates aqui
 };
 
 export function getTemplate(
