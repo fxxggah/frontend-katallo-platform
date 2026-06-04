@@ -71,10 +71,9 @@ export function EsterNavbar({ store }: EsterNavbarProps) {
             className="group relative flex items-center gap-2.5 rounded-full bg-[#EB3B6F] px-3 py-2.5 text-[11px] font-bold uppercase tracking-[0.15em] text-white shadow-md shadow-[#EB3B6F]/20 transition-all duration-300 hover:bg-[#B52D4F] hover:shadow-lg hover:shadow-[#B52D4F]/30 active:scale-95"
           >
             <ShoppingBag
-              size={16}
+              size={18}
               className="transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-110"
             />
-            <span>Carrinho</span>
           </Link>
         </div>
 
