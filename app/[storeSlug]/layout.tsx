@@ -1,51 +1,95 @@
-"use client";
-
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { useEffect } from "react";
-import { useParams } from "next/navigation";
-import { CartProvider } from "@/contexts/CartContext";
-import { storeService } from "@/services/storeService";
+import StoreClientLayout from "@/components/store/StoreClientLayout";
 
-type StoreLayoutProps = {
+type LayoutProps = {
   children: ReactNode;
+  params: Promise<{
+    storeSlug: string;
+  }>;
 };
 
-export default function StoreLayout({ children }: StoreLayoutProps) {
-  const params = useParams();
-
-  const storeSlug = Array.isArray(params.storeSlug)
-    ? params.storeSlug[0]
-    : params.storeSlug;
-
-  useEffect(() => {
-    async function loadFavicon() {
-      if (!storeSlug) return;
-
-      try {
-        const store = await storeService.getStoreBySlug(storeSlug);
-
-        const faviconUrl = store.favicon || "/favicon.ico";
-
-        let favicon = document.querySelector<HTMLLinkElement>("link[rel='icon']");
-
-        if (!favicon) {
-          favicon = document.createElement("link");
-          favicon.rel = "icon";
-          document.head.appendChild(favicon);
-        }
-
-        favicon.href = faviconUrl;
-      } catch {
-        console.error("Erro ao carregar favicon da loja");
-      }
+async function getStore(slug: string) {
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/stores/${slug}`,
+    {
+      next: {
+        revalidate: 60,
+      },
     }
+  );
 
-    loadFavicon();
-  }, [storeSlug]);
-
-  if (!storeSlug) {
-    return <>{children}</>;
+  if (!response.ok) {
+    return null;
   }
 
-  return <CartProvider storeSlug={storeSlug}>{children}</CartProvider>;
+  return response.json();
+}
+
+export async function generateMetadata(
+  { params }: LayoutProps
+): Promise<Metadata> {
+  const { storeSlug } = await params;
+
+  const store = await getStore(storeSlug);
+
+  if (!store) {
+    return {
+      title: "Loja não encontrada",
+    };
+  }
+
+  return {
+    title: store.name,
+
+    description:
+      store.description ??
+      `Conheça os produtos da ${store.name}`,
+
+    icons: {
+      icon: [
+        {
+          url: store.favicon,
+          type: "image/png",
+        },
+      ],
+      shortcut: [
+        {
+          url: store.favicon,
+        },
+      ],
+      apple: [
+        {
+          url: store.favicon,
+        },
+      ],
+    },
+
+    openGraph: {
+      title: store.name,
+      description:
+        store.description ??
+        `Conheça os produtos da ${store.name}`,
+      images: store.logo
+        ? [
+          {
+            url: store.logo,
+          },
+        ]
+        : undefined,
+    },
+  };
+}
+
+export default async function StoreLayout({
+  children,
+  params,
+}: LayoutProps) {
+  const { storeSlug } = await params;
+
+  return (
+    <StoreClientLayout storeSlug={storeSlug}>
+      {children}
+    </StoreClientLayout>
+  );
 }

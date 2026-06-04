@@ -14,10 +14,7 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
-  title: {
-    default: "Katallo",
-    template: "%s | Katallo",
-  },
+  title: "Katallo",
 
   description:
     "Transforme seu Instagram em uma máquina de vendas com um catálogo profissional.",
