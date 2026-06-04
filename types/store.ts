@@ -4,7 +4,8 @@
 
 export type StoreTemplate =
   | "MINIMAL"
-  | "GBGAMES";
+  | "GBGAMES"
+  | "ESTER";
 
 export type StoreRequest = {
   name: string;

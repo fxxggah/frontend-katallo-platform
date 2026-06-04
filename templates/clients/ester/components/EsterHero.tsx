@@ -10,13 +10,6 @@ export function EsterHero() {
       <div className="absolute left-1/2 top-0 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-[#EB3B6F]/10 blur-[140px]" />
 
       <div className="relative h-[700px]">
-        <Image
-          src="/images/templates/ester/hero-store.jpg"
-          alt="Ester Moda Evangélica"
-          fill
-          priority
-          className="object-cover"
-        />
 
         <div className="relative z-20 mx-auto flex h-full max-w-7xl items-center px-6">
           <div className="max-w-3xl">
