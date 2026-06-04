@@ -1,11 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-
-import {
-  ChevronLeft,
-  ChevronRight,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles } from "lucide-react";
 
 import type {
   ProductResponse,
@@ -23,59 +19,56 @@ export function EsterRelatedProductsCarousel({
   store,
   products,
 }: EsterRelatedProductsCarouselProps) {
-  const carouselRef =
-    useRef<HTMLDivElement | null>(null);
+  const carouselRef = useRef<HTMLDivElement | null>(null);
 
-  if (!products.length) {
-    return null;
-  }
+  if (!products.length) return null;
 
   function scrollLeft() {
-    carouselRef.current?.scrollBy({
-      left: -320,
-      behavior: "smooth",
-    });
+    carouselRef.current?.scrollBy({ left: -320, behavior: "smooth" });
   }
 
   function scrollRight() {
-    carouselRef.current?.scrollBy({
-      left: 320,
-      behavior: "smooth",
-    });
+    carouselRef.current?.scrollBy({ left: 320, behavior: "smooth" });
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-6 pb-20">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#D89CA8]">
-            Selecionados para você
-          </span>
+    <section className="relative mx-auto max-w-7xl px-6 pb-20">
 
-          <h2 className="mt-3 text-3xl font-semibold text-[#4B3C40] sm:text-4xl">
+      {/* Header da seção */}
+      <div className="mb-10 flex items-end justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <Sparkles size={13} className="text-[#E91E8C]" />
+            <span className="text-[10px] font-black uppercase tracking-[0.35em] text-[#E91E8C]">
+              Selecionados para você
+            </span>
+          </div>
+          <h2
+            className="mt-3 text-3xl font-bold text-[#2D0A1E] sm:text-4xl"
+            style={{ fontFamily: "'Georgia', serif" }}
+          >
             Você também pode gostar
           </h2>
-
-          <p className="mt-2 text-sm text-[#9A7E84]">
-            Produtos escolhidos para combinar com seu estilo.
+          <p className="mt-2 text-sm text-[#9A5568]">
+            Peças escolhidas a dedo para combinar com seu estilo.
           </p>
         </div>
 
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-2 md:flex">
           <button
             type="button"
             onClick={scrollLeft}
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-[#F3E8EA] bg-white text-[#D89CA8] transition-all duration-300 hover:bg-[#FFF2F4]"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-rose-100 bg-white text-[#E91E8C] shadow-sm transition-all duration-300 hover:bg-gradient-to-br hover:from-[#E91E8C] hover:to-[#C2185B] hover:text-white hover:border-transparent hover:shadow-md hover:shadow-rose-300/30"
           >
-            <ChevronLeft size={20} />
+            <ChevronLeft size={18} />
           </button>
 
           <button
             type="button"
             onClick={scrollRight}
-            className="flex h-12 w-12 items-center justify-center rounded-full border border-[#F3E8EA] bg-white text-[#D89CA8] transition-all duration-300 hover:bg-[#FFF2F4]"
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-rose-100 bg-white text-[#E91E8C] shadow-sm transition-all duration-300 hover:bg-gradient-to-br hover:from-[#E91E8C] hover:to-[#C2185B] hover:text-white hover:border-transparent hover:shadow-md hover:shadow-rose-300/30"
           >
-            <ChevronRight size={20} />
+            <ChevronRight size={18} />
           </button>
         </div>
       </div>
@@ -87,12 +80,9 @@ export function EsterRelatedProductsCarousel({
         {products.map((product) => (
           <div
             key={product.id}
-            className="w-[220px] flex-none sm:w-[250px] md:w-[280px]"
+            className="w-[220px] flex-none sm:w-[250px] md:w-[270px]"
           >
-            <EsterProductCard
-              store={store}
-              product={product}
-            />
+            <EsterProductCard store={store} product={product} />
           </div>
         ))}
       </div>
