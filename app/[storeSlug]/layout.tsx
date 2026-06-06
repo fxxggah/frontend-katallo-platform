@@ -33,7 +33,7 @@ export async function generateMetadata(
 
   const store = await getStore(storeSlug);
 
-  if (!store) {
+  if (!store) { 
     return {
       title: "Loja não encontrada",
     };
