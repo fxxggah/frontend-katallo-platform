@@ -73,15 +73,6 @@ export function EsterNavbar({ store }: EsterNavbarProps) {
 
           {/* Ações Direita */}
           <div className="flex items-center gap-3">
-            <a
-              href="https://www.instagram.com/ester__moda_evangelica_botu/"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="Instagram"
-              className="hidden h-10 w-10 items-center justify-center rounded-full border border-rose-200 bg-rose-50 text-[#E91E8C] transition-all duration-300 hover:bg-gradient-to-br hover:from-[#E91E8C] hover:to-[#C2185B] hover:text-white hover:border-transparent hover:shadow-lg hover:shadow-rose-300/40 md:flex"
-            >
-              <Instagram size={16} />
-            </a>
 
             <Link
               href={`/${store.slug}/cart`}

@@ -740,7 +740,7 @@ export default function HomePage() {
 
             {/* NAV */}
             <nav className="relative z-10 hidden items-center gap-1 lg:flex">
-              {["Produtos", "Preços", "Cases", "Sobre"].map((item) => (
+              {["Produtos", "Preços", "Sobre"].map((item) => (
                 <a
                   key={item}
                   href="#"
