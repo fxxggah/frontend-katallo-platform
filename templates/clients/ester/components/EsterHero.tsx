@@ -49,7 +49,7 @@ export function EsterHero() {
           <div className="inline-flex items-center gap-2.5 rounded-full bg-white/80 px-5 py-2 shadow-md shadow-rose-200/40 backdrop-blur-md border border-rose-100">
             <span className="h-2 w-2 animate-pulse rounded-full bg-[#E91E8C]" />
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C2185B]">
-              Nova Coleção • 2025
+              Nova Coleção • 2026
             </span>
           </div>
 
