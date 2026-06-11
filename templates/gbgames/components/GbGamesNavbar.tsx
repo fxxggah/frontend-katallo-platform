@@ -48,14 +48,21 @@ export function GbGamesNavbar({ store }: GbGamesNavbarProps) {
           <div className="relative flex items-center justify-between px-6 py-3.5">
             <GbGamesLogo store={store} />
 
-            {/* Center: decorative HUD text */}
-            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden xl:flex items-center gap-3">
-              <div className="h-px w-8 bg-gradient-to-r from-transparent to-[#7B2CFF]/40" />
-              <span className="text-[8px] font-black uppercase tracking-[0.5em] text-[#7B2CFF]/40 font-mono">
-                SISTEMA ATIVO
-              </span>
-              <div className="h-px w-8 bg-gradient-to-l from-transparent to-[#7B2CFF]/40" />
-            </div>
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden xl:flex items-center gap-4 select-none pointer-events-none">
+  <div className="h-px w-12 bg-gradient-to-r from-transparent via-[#7B2CFF]/50 to-transparent" />
+  
+  <div className="relative flex items-center justify-center">
+    <span className="absolute text-[9px] font-black uppercase tracking-[0.4em] text-[#7B2CFF]/30 font-mono blur-[2px]">
+      Tudo para seu setup
+    </span>
+    <span className="relative text-[9px] font-black uppercase tracking-[0.4em] text-white/60 font-mono transition-all duration-300 hover:text-white">
+      Tudo para seu setup
+    </span>
+  </div>
+
+  <div className="h-px w-12 bg-gradient-to-l from-transparent via-[#7B2CFF]/50 to-transparent" />
+</div>
+
 
             <nav className="flex items-center gap-2">
               <Link

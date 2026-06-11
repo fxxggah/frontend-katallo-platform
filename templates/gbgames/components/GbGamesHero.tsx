@@ -87,24 +87,6 @@ export function GbGamesHero() {
           moderna, tecnológica e premium. Eleve seu setup ao próximo nível.
         </p>
 
-        {/* Stat badges */}
-        <div className="mt-8 flex flex-wrap gap-3">
-          {[
-            { label: "Produtos Premium", value: "100+" },
-            { label: "Envio Rápido", value: "24h" },
-            { label: "Suporte", value: "WhatsApp" },
-          ].map((stat) => (
-            <div
-              key={stat.label}
-              className="flex items-center gap-2.5 rounded-xl border border-white/8 bg-white/3 px-4 py-2.5 backdrop-blur-sm"
-            >
-              <span className="text-sm font-black text-[#C084FC]">{stat.value}</span>
-              <div className="h-3 w-px bg-white/15" />
-              <span className="text-xs text-zinc-500 uppercase tracking-wider">{stat.label}</span>
-            </div>
-          ))}
-        </div>
-
         {/* CTA Buttons */}
         <div className="mt-10 flex flex-wrap gap-4">
           <button className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-[#4A0099] to-[#7B2CFF] px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-white shadow-[0_0_40px_rgba(123,44,255,0.5)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_rgba(123,44,255,0.7)]">
