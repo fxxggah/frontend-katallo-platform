@@ -87,7 +87,6 @@ export function GbGamesHero() {
           moderna, tecnológica e premium. Eleve seu setup ao próximo nível.
         </p>
 
-        {/* CTA Buttons */}
         <div className="mt-10 flex flex-wrap gap-4">
           <button className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-[#4A0099] to-[#7B2CFF] px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-white shadow-[0_0_40px_rgba(123,44,255,0.5)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_rgba(123,44,255,0.7)]">
             {/* Shimmer */}
