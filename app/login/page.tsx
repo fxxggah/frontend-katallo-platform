@@ -207,7 +207,7 @@ export default function LoginPage() {
           <div className="mt-24 max-w-xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-500/20 bg-indigo-500/10 px-4 py-2 text-[11px] font-black uppercase tracking-[0.22em] text-indigo-300">
               <Sparkles className="h-4 w-4" />
-              Plataforma premium para vendas
+              A Plataforma para o seu catálogo digital
             </div>
 
             <h1 className="text-6xl font-playfair font-black leading-[1.02] tracking-tight text-white">
