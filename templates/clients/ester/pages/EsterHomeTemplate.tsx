@@ -12,6 +12,7 @@ import { EsterHero } from "../components/EsterHero";
 import { EsterFooter } from "../components/EsterFooter";
 import { EsterCategoryCard } from "../components/EsterCategoryCard";
 import { EsterProductCard } from "../components/EsterProductCard";
+import { CarouselSlider } from "@/components/store/CarouselSlider";
 
 type EsterHomeTemplateProps = {
   store: StoreResponse;
@@ -79,14 +80,18 @@ export function EsterHomeTemplate({
               title="Explore nossas coleções"
               subtitle="Descubra peças cuidadosamente selecionadas para cada ocasião."
             />
-            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
-              {categories.map((category) => (
-                <EsterCategoryCard
-                  key={category.id}
-                  store={store}
-                  category={category}
-                />
-              ))}
+            <div className="px-6">
+              <CarouselSlider
+                items={categories}
+                itemsPerPage={4}
+                renderItem={(category) => (
+                  <EsterCategoryCard
+                    key={category.id}
+                    store={store}
+                    category={category}
+                  />
+                )}
+              />
             </div>
           </section>
         )}
@@ -113,14 +118,18 @@ export function EsterHomeTemplate({
               subtitle="As peças favoritas das nossas clientes."
               icon={Star}
             />
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {featuredProducts.map((product) => (
-                <EsterProductCard
-                  key={product.id}
-                  store={store}
-                  product={product}
-                />
-              ))}
+            <div className="px-6">
+              <CarouselSlider
+                items={featuredProducts}
+                itemsPerPage={4}
+                renderItem={(product) => (
+                  <EsterProductCard
+                    key={product.id}
+                    store={store}
+                    product={product}
+                  />
+                )}
+              />
             </div>
           </section>
         )}
@@ -152,14 +161,18 @@ export function EsterHomeTemplate({
               title="Todos os produtos"
               subtitle="Navegue por toda a nossa seleção de moda evangélica."
             />
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {availableProducts.map((product) => (
-                <EsterProductCard
-                  key={product.id}
-                  store={store}
-                  product={product}
-                />
-              ))}
+            <div className="px-6">
+              <CarouselSlider
+                items={availableProducts}
+                itemsPerPage={4}
+                renderItem={(product) => (
+                  <EsterProductCard
+                    key={product.id}
+                    store={store}
+                    product={product}
+                  />
+                )}
+              />
             </div>
           </section>
         )}

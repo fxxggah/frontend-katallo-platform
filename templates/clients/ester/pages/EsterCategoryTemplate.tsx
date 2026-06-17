@@ -10,6 +10,7 @@ import { Sparkles } from "lucide-react";
 import { EsterNavbar } from "../components/EsterNavbar";
 import { EsterFooter } from "../components/EsterFooter";
 import { EsterProductCard } from "../components/EsterProductCard";
+import { CarouselSlider } from "@/components/store/CarouselSlider";
 
 type EsterCategoryTemplateProps = {
   store: StoreResponse;
@@ -63,14 +64,18 @@ export function EsterCategoryTemplate({
 
       <main className="mx-auto max-w-7xl px-6 py-14">
         {productsPage.content.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {productsPage.content.map((product) => (
-              <EsterProductCard
-                key={product.id}
-                store={store}
-                product={product}
-              />
-            ))}
+          <div className="px-6">
+            <CarouselSlider
+              items={productsPage.content}
+              itemsPerPage={4}
+              renderItem={(product) => (
+                <EsterProductCard
+                  key={product.id}
+                  store={store}
+                  product={product}
+                />
+              )}
+            />
           </div>
         ) : (
           <div className="rounded-3xl border border-rose-100 bg-gradient-to-br from-[#FFF0F5] to-white p-16 text-center shadow-sm">
