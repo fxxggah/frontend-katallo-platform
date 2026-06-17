@@ -84,7 +84,7 @@ export function EsterProductCard({
         {/* Info */}
         <div className="p-4">
           {/* Nome */}
-          <h3 className="line-clamp-2 min-h-[44px] text-[13px] font-bold leading-snug text-[#2D0A1E] transition-colors group-hover:text-[#C2185B]">
+          <h3 className="line-clamp-2 min-h-[22px] text-[13px] font-bold leading-snug text-[#2D0A1E] transition-colors group-hover:text-[#C2185B]">
             {product.name}
           </h3>
 
