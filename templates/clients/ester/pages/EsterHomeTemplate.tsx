@@ -12,7 +12,7 @@ import { EsterHero } from "../components/EsterHero";
 import { EsterFooter } from "../components/EsterFooter";
 import { EsterCategoryCard } from "../components/EsterCategoryCard";
 import { EsterProductCard } from "../components/EsterProductCard";
-import { CarouselSlider } from "@/components/store/CarouselSlider";
+import { CarouselSlider } from "@/templates/clients/ester/components/EsterCarouselSlider";
 
 type EsterHomeTemplateProps = {
   store: StoreResponse;
