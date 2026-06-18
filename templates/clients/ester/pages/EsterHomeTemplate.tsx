@@ -12,7 +12,7 @@ import { EsterHero } from "../components/EsterHero";
 import { EsterFooter } from "../components/EsterFooter";
 import { EsterCategoryCard } from "../components/EsterCategoryCard";
 import { EsterProductCard } from "../components/EsterProductCard";
-import { CarouselSlider } from "@/templates/clients/ester/components/EsterCarouselSlider";
+import { EsterHorizontalCarousel } from "@/templates/clients/ester/components/EsterHorizontalCarousel";
 
 type EsterHomeTemplateProps = {
   store: StoreResponse;
@@ -81,12 +81,11 @@ export function EsterHomeTemplate({
               subtitle="Descubra peças cuidadosamente selecionadas para cada ocasião."
             />
             <div className="px-6">
-              <CarouselSlider
+              <EsterHorizontalCarousel
                 items={categories}
-                itemsPerPage={4}
+                itemClassName="w-[260px] flex-none md:w-[300px]"
                 renderItem={(category) => (
                   <EsterCategoryCard
-                    key={category.id}
                     store={store}
                     category={category}
                   />
@@ -119,12 +118,11 @@ export function EsterHomeTemplate({
               icon={Star}
             />
             <div className="px-6">
-              <CarouselSlider
+              <EsterHorizontalCarousel
                 items={featuredProducts}
-                itemsPerPage={4}
+                itemClassName="w-[220px] flex-none sm:w-[250px] md:w-[270px]"
                 renderItem={(product) => (
                   <EsterProductCard
-                    key={product.id}
                     store={store}
                     product={product}
                   />
@@ -162,12 +160,11 @@ export function EsterHomeTemplate({
               subtitle="Navegue por toda a nossa seleção de moda evangélica."
             />
             <div className="px-6">
-              <CarouselSlider
+              <EsterHorizontalCarousel
                 items={availableProducts}
-                itemsPerPage={4}
+                itemClassName="w-[220px] flex-none sm:w-[250px] md:w-[270px]"
                 renderItem={(product) => (
                   <EsterProductCard
-                    key={product.id}
                     store={store}
                     product={product}
                   />
