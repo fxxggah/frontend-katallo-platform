@@ -40,8 +40,7 @@ export function EsterCategoryCard({
           <span className="text-[9px] font-black uppercase tracking-[0.35em] text-[#E91E8C]/70">
             Categoria
           </span>
-
-          {/* Nome */}
+          
           <h3
             className="mt-2 text-lg font-bold text-[#2D0A1E] transition-colors group-hover:text-[#C2185B]"
             style={{ fontFamily: "'Georgia', serif" }}
