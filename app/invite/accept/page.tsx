@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, Loader2, Mail, ShieldAlert } from "lucide-react";
 
@@ -10,7 +10,7 @@ import { authService } from "@/services/authService";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function AcceptInvitePage() {
+function AcceptInviteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -137,7 +137,8 @@ export default function AcceptInvitePage() {
               </Button>
 
               <p className="text-center text-xs text-slate-400">
-                Se você ainda não estiver logado, será enviado para a tela de login.
+                Se você ainda não estiver logado, será enviado para a tela de
+                login.
               </p>
             </>
           )}
@@ -152,5 +153,24 @@ export default function AcceptInvitePage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function AcceptInvitePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-10 w-10 animate-spin text-slate-900" />
+            <p className="text-sm font-medium text-slate-500">
+              Carregando...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <AcceptInviteContent />
+    </Suspense>
   );
 }
