@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import axios from "axios";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -27,7 +27,7 @@ const googleClientId =
   process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() ||
   "711004756306-c1qb90c3ogkkjnsvcov86of25mmrhhjp.apps.googleusercontent.com";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
@@ -307,9 +307,9 @@ export default function LoginPage() {
             </p>
 
             {/* GOOGLE BUTTON CONTROLLER */}
-<div className="relative flex justify-center mt-6">
-  {/* Botão Bonito Customizado (Visual) */}
-  <div className="
+            <div className="relative flex justify-center mt-6">
+              {/* Botão Bonito Customizado (Visual) */}
+              <div className="
     pointer-events-none absolute inset-0 
     flex h-14 w-full items-center justify-center gap-3 
     rounded-2xl border border-slate-200 bg-white 
@@ -317,39 +317,39 @@ export default function LoginPage() {
     transition-all duration-300 
     hover:bg-slate-50 hover:scale-[1.01]
   ">
-    {/* Ícone do Google G-Logo simplificado */}
-    <svg className="h-5 w-5" viewBox="0 0 24 24">
-      <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.3 1.55-1.17 2.86-2.5 3.74v3.1h4.05c2.37-2.17 3.74-5.39 3.74-8.69z"/>
-      <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-4.05-3.1c-1.12.75-2.55 1.19-3.88 1.19-2.99 0-5.52-2.01-6.42-4.73H1.32v3.2A11.996 11.996 0 0012 24z"/>
-      <path fill="#FBBC05" d="M5.58 14.45a7.21 7.21 0 010-4.9V6.35H1.32a11.983 11.983 0 000 11.3l4.26-3.2z"/>
-      <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43A11.95 11.95 0 0012 0 11.996 11.996 0 001.32 6.35l4.26 3.2c.9-2.72 3.43-4.73 6.42-4.73z"/>
-    </svg>
-    Entrar com o Google
-  </div>
+                {/* Ícone do Google G-Logo simplificado */}
+                <svg className="h-5 w-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.61c-.3 1.55-1.17 2.86-2.5 3.74v3.1h4.05c2.37-2.17 3.74-5.39 3.74-8.69z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-4.05-3.1c-1.12.75-2.55 1.19-3.88 1.19-2.99 0-5.52-2.01-6.42-4.73H1.32v3.2A11.996 11.996 0 0012 24z" />
+                  <path fill="#FBBC05" d="M5.58 14.45a7.21 7.21 0 010-4.9V6.35H1.32a11.983 11.983 0 000 11.3l4.26-3.2z" />
+                  <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43A11.95 11.95 0 0012 0 11.996 11.996 0 001.32 6.35l4.26 3.2c.9-2.72 3.43-4.73 6.42-4.73z" />
+                </svg>
+                Entrar com o Google
+              </div>
 
-  {/* Botão Real do Google (Invisível, mas mantém a lógica do clique) */}
-  <div
-    id="googleButton"
-    className="h-14 w-full opacity-0 [&_iframe]:!w-full [&_iframe]:!h-14 cursor-pointer z-10"
-  />
-</div>
+              {/* Botão Real do Google (Invisível, mas mantém a lógica do clique) */}
+              <div
+                id="googleButton"
+                className="h-14 w-full opacity-0 [&_iframe]:!w-full [&_iframe]:!h-14 cursor-pointer z-10"
+              />
+            </div>
 
-{/* LOADING STATE */}
-{(status === "loading-script" || status === "submitting") && (
-  <div className="mt-6">
-    <Button
-      disabled
-      className="
+            {/* LOADING STATE */}
+            {(status === "loading-script" || status === "submitting") && (
+              <div className="mt-6">
+                <Button
+                  disabled
+                  className="
         h-14 w-full rounded-2xl bg-slate-900 text-base font-bold text-white
         shadow-[0_10px_30px_rgba(15,23,42,0.1)] backdrop-blur-sm
         transition-all duration-300
       "
-    >
-      <Loader2 className="mr-3 h-5 w-5 animate-spin text-indigo-400" />
-      {status === "loading-script" ? "Preparando ambiente..." : "Autenticando..."}
-    </Button>
-  </div>
-)}
+                >
+                  <Loader2 className="mr-3 h-5 w-5 animate-spin text-indigo-400" />
+                  {status === "loading-script" ? "Preparando ambiente..." : "Autenticando..."}
+                </Button>
+              </div>
+            )}
 
             {errorMessage && (
               <div className="mt-6 rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-600">
@@ -389,5 +389,19 @@ export default function LoginPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      }
+    >
+      <LoginContent />
+    </Suspense>
   );
 }
