@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import axios from "axios";
 import Link from "next/link";
 import { useEffect, useState } from "react";
