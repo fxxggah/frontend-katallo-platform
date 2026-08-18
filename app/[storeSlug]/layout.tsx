@@ -33,20 +33,35 @@ export async function generateMetadata(
 
   const store = await getStore(storeSlug);
 
-  if (!store) { 
+  if (!store) {
     return {
       title: "Loja não encontrada",
     };
   }
 
-  return {
+  const metadata: Metadata = {
     title: store.name,
-
     description:
       store.description ??
       `Conheça os produtos da ${store.name}`,
 
-    icons: {
+    openGraph: {
+      title: store.name,
+      description:
+        store.description ??
+        `Conheça os produtos da ${store.name}`,
+      images: store.logo
+        ? [
+            {
+              url: store.logo,
+            },
+          ]
+        : undefined,
+    },
+  };
+
+  if (store.favicon) {
+    metadata.icons = {
       icon: [
         {
           url: store.favicon,
@@ -63,22 +78,10 @@ export async function generateMetadata(
           url: store.favicon,
         },
       ],
-    },
+    };
+  }
 
-    openGraph: {
-      title: store.name,
-      description:
-        store.description ??
-        `Conheça os produtos da ${store.name}`,
-      images: store.logo
-        ? [
-          {
-            url: store.logo,
-          },
-        ]
-        : undefined,
-    },
-  };
+  return metadata;
 }
 
 export default async function StoreLayout({
