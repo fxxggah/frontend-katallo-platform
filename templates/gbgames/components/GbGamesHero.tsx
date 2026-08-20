@@ -62,7 +62,7 @@ export function GbGamesHero() {
             Seu Setup
           </span>
 
-          <span className="block">
+          <span className="block text-white/90">
             gamer
 
             <span
