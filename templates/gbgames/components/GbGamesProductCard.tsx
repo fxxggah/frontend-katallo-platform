@@ -73,12 +73,6 @@ export function GbGamesProductCard({ store, product }: GbGamesProductCardProps) 
 
         {/* Badges top row */}
         <div className="absolute left-3 top-3 z-20 flex flex-col gap-1.5">
-          <div className="flex items-center gap-1.5 rounded-lg border border-[#7B2CFF]/30 bg-[#06040F]/80 px-2.5 py-1 backdrop-blur-md">
-            <Zap size={8} className="text-[#F5C542]" fill="#F5C542" />
-            <span className="text-[8px] font-black uppercase tracking-[0.3em] text-[#C084FC]">
-              Gamer
-            </span>
-          </div>
 
           {product.featured && product.inStock && (
             <div className="flex items-center gap-1.5 rounded-lg border border-[#F5C542]/30 bg-[#06040F]/80 px-2.5 py-1 backdrop-blur-md">
