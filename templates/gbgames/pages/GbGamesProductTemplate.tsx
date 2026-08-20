@@ -62,7 +62,10 @@ export function GbGamesProductTemplate({ store, product, relatedProducts = [] }:
     : 0;
 
   return (
-    <div className="relative min-h-screen bg-[#06040F] text-white">
+    <div
+      id="produtos"
+      className="relative min-h-screen bg-[#06040F] text-white"
+    >
       <GbGamesParticles />
       <GbGamesNavbar store={store} />
 
@@ -109,11 +112,10 @@ export function GbGamesProductTemplate({ store, product, relatedProducts = [] }:
                   <button
                     key={image.id}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`relative overflow-hidden flex-shrink-0 rounded-xl border-2 transition-all duration-300 ${
-                      selectedImageIndex === index
+                    className={`relative overflow-hidden flex-shrink-0 rounded-xl border-2 transition-all duration-300 ${selectedImageIndex === index
                         ? "border-[#7B2CFF] shadow-[0_0_20px_rgba(123,44,255,0.5)]"
                         : "border-white/8 hover:border-[#7B2CFF]/40"
-                    }`}
+                      }`}
                   >
                     <img
                       src={image.imageUrl}
@@ -213,11 +215,10 @@ export function GbGamesProductTemplate({ store, product, relatedProducts = [] }:
             ) : (
               <button
                 onClick={openConfirmation}
-                className={`group relative mt-8 flex w-full items-center justify-center gap-3 overflow-hidden rounded-xl px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-white transition-all duration-300 hover:-translate-y-0.5 ${
-                  isInCart
+                className={`group relative mt-8 flex w-full items-center justify-center gap-3 overflow-hidden rounded-xl px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-white transition-all duration-300 hover:-translate-y-0.5 ${isInCart
                     ? "bg-gradient-to-r from-red-700 to-rose-600 shadow-[0_0_30px_rgba(239,68,68,0.3)] hover:shadow-[0_0_45px_rgba(239,68,68,0.45)]"
                     : "bg-gradient-to-br from-[#4A0099] to-[#7B2CFF] shadow-[0_0_40px_rgba(123,44,255,0.4)] hover:shadow-[0_0_60px_rgba(123,44,255,0.6)]"
-                }`}
+                  }`}
               >
                 {/* Shimmer */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />

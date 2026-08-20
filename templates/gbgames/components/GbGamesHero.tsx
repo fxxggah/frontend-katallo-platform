@@ -44,9 +44,11 @@ export function GbGamesHero() {
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#A855F7] opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-[#A855F7]" />
           </div>
+
           <span className="text-[9px] font-black uppercase tracking-[0.4em] text-[#C084FC]">
             Sua nova loja gamer de Botucatu
           </span>
+
           {/* Right accent */}
           <div className="h-px w-6 bg-gradient-to-r from-[#7B2CFF]/60 to-transparent" />
         </div>
@@ -56,17 +58,23 @@ export function GbGamesHero() {
           className="mt-10 text-6xl font-black leading-[0.9] tracking-tight text-white sm:text-8xl md:text-[106px]"
           style={{ fontFamily: "'Syne', 'Georgia', serif" }}
         >
-          <span className="block text-white/90">Performance</span>
+          <span className="block text-white/90">
+            Seu Setup
+          </span>
+
           <span className="block">
             gamer
+
             <span
-              className="relative inline-block ml-4 bg-gradient-to-br from-[#E2C4FF] via-[#A855F7] to-[#5A00B1] bg-clip-text text-transparent"
+              className="relative ml-4 inline-block bg-gradient-to-br from-[#E2C4FF] via-[#A855F7] to-[#5A00B1] bg-clip-text text-transparent"
             >
               {" "}começa
+
               {/* Underline accent */}
-              <span className="absolute -bottom-2 left-0 right-0 h-[3px] bg-gradient-to-r from-[#7B2CFF] via-[#A855F7] to-transparent rounded-full" />
+              <span className="absolute -bottom-2 left-0 right-0 h-[3px] rounded-full bg-gradient-to-r from-[#7B2CFF] via-[#A855F7] to-transparent" />
             </span>
           </span>
+
           <span className="block bg-gradient-to-r from-[#F5C542] via-[#FFDD88] to-[#F5C542] bg-clip-text text-transparent">
             aqui.
           </span>
@@ -79,6 +87,7 @@ export function GbGamesHero() {
           <div className="h-[1px] w-6 bg-[#7B2CFF]/30" />
         </div>
 
+        {/* Description */}
         <p
           className="mt-8 max-w-2xl text-lg leading-relaxed text-zinc-400 md:text-xl"
           style={{ fontFamily: "'DM Sans', 'sans-serif'" }}
@@ -87,18 +96,36 @@ export function GbGamesHero() {
           moderna, tecnológica e premium. Eleve seu setup ao próximo nível.
         </p>
 
+        {/* CTAs */}
         <div className="mt-10 flex flex-wrap gap-4">
-          <button className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-[#4A0099] to-[#7B2CFF] px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-white shadow-[0_0_40px_rgba(123,44,255,0.5)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_rgba(123,44,255,0.7)]">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-            <span className="relative z-10">Explorar Produtos</span>
-          </button>
 
-          <button className="group relative overflow-hidden rounded-xl border border-[#7B2CFF]/30 bg-transparent px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-white transition-all duration-300 hover:border-[#A855F7]/60 hover:bg-[#7B2CFF]/8 hover:shadow-[0_0_30px_rgba(123,44,255,0.2)]">
+          {/* Explorar Produtos */}
+          <a
+            href="#produtos"
+            className="group relative overflow-hidden rounded-xl bg-gradient-to-br from-[#4A0099] to-[#7B2CFF] px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-white shadow-[0_0_40px_rgba(123,44,255,0.5)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_60px_rgba(123,44,255,0.7)]"
+          >
+            <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full" />
+
+            <span className="relative z-10">
+              Explorar Produtos
+            </span>
+          </a>
+
+          {/* Ver Categorias */}
+          <a
+            href="#categorias"
+            className="group relative overflow-hidden rounded-xl border border-[#7B2CFF]/30 bg-transparent px-8 py-4 text-sm font-black uppercase tracking-[0.2em] text-white transition-all duration-300 hover:border-[#A855F7]/60 hover:bg-[#7B2CFF]/8 hover:shadow-[0_0_30px_rgba(123,44,255,0.2)]"
+          >
             {/* Corner accents */}
             <div className="absolute left-0 top-0 h-3 w-3 border-l-2 border-t-2 border-[#7B2CFF]/60" />
-            <div className="absolute right-0 bottom-0 h-3 w-3 border-r-2 border-b-2 border-[#7B2CFF]/60" />
-            <span className="relative z-10">Ver Categorias</span>
-          </button>
+
+            <div className="absolute bottom-0 right-0 h-3 w-3 border-b-2 border-r-2 border-[#7B2CFF]/60" />
+
+            <span className="relative z-10">
+              Ver Categorias
+            </span>
+          </a>
+
         </div>
       </div>
 
@@ -109,6 +136,7 @@ export function GbGamesHero() {
       <div className="absolute bottom-0 left-0 right-0 flex items-center justify-center">
         <div className="h-[1px] w-full max-w-5xl bg-gradient-to-r from-transparent via-[#7B2CFF]/30 to-transparent" />
       </div>
+
     </section>
   );
 }

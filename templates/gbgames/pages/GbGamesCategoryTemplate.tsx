@@ -14,7 +14,10 @@ type GbGamesCategoryTemplateProps = {
 
 export function GbGamesCategoryTemplate({ store, category, productsPage }: GbGamesCategoryTemplateProps) {
   return (
-    <div className="relative min-h-screen bg-[#06040F] text-white">
+    <div
+      id="categorias"
+      className="relative min-h-screen bg-[#06040F] text-white"
+    >
       <GbGamesParticles />
       <GbGamesNavbar store={store} />
 
