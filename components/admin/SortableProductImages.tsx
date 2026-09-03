@@ -19,7 +19,11 @@ import {
   useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Trash2 } from "lucide-react";
+import {
+  GripVertical,
+  ImageOff,
+  Trash2,
+} from "lucide-react";
 
 import { CartActionConfirmDialog } from "@/components/cart/CartActionConfirmDialog";
 
@@ -34,7 +38,9 @@ type SortableProductImagesProps = {
   images: SortableProductImage[];
   onChange: (images: SortableProductImage[]) => void;
   onRemove?: (image: SortableProductImage) => void;
-  onReorder?: (images: SortableProductImage[]) => Promise<void> | void;
+  onReorder?: (
+    images: SortableProductImage[]
+  ) => Promise<void> | void;
 };
 
 function getPreviewUrl(imageUrl: string) {
@@ -42,7 +48,10 @@ function getPreviewUrl(imageUrl: string) {
     return imageUrl;
   }
 
-  return imageUrl.replace("/upload/", "/upload/w_300,q_auto,f_auto/");
+  return imageUrl.replace(
+    "/upload/",
+    "/upload/w_300,q_auto,f_auto/"
+  );
 }
 
 function SortableImageItem({
@@ -55,6 +64,7 @@ function SortableImageItem({
   onRemove?: (image: SortableProductImage) => void;
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   const {
     attributes,
@@ -81,17 +91,27 @@ function SortableImageItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`relative aspect-square overflow-hidden rounded-2xl border bg-slate-50 shadow-sm transition-all ${
-        isDragging
+      className={`relative aspect-square overflow-hidden rounded-2xl border bg-slate-50 shadow-sm transition-all ${isDragging
           ? "z-50 scale-105 border-slate-900 opacity-90"
           : "border-slate-100"
-      }`}
+        }`}
     >
-      <img
-        src={getPreviewUrl(image.imageUrl)}
-        alt=""
-        className="h-full w-full object-cover"
-      />
+      {imageError ? (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2 p-4 text-center">
+          <ImageOff className="h-7 w-7 text-slate-300" />
+
+          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+            Não foi possível carregar
+          </span>
+        </div>
+      ) : (
+        <img
+          src={getPreviewUrl(image.imageUrl)}
+          alt=""
+          className="h-full w-full object-cover"
+          onError={() => setImageError(true)}
+        />
+      )}
 
       {index === 0 && (
         <div className="absolute left-2 top-2 rounded-full bg-amber-500 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-white shadow">
@@ -152,21 +172,35 @@ export function SortableProductImages({
   async function handleDragEnd(event: DragEndEvent) {
     const { active, over } = event;
 
-    if (!over || active.id === over.id) return;
+    if (!over || active.id === over.id) {
+      return;
+    }
 
-    const oldIndex = images.findIndex((image) => String(image.id) === active.id);
-    const newIndex = images.findIndex((image) => String(image.id) === over.id);
-
-    if (oldIndex === -1 || newIndex === -1) return;
-
-    const reorderedImages = arrayMove(images, oldIndex, newIndex).map(
-      (image, index) => ({
-        ...image,
-        position: index + 1,
-      })
+    const oldIndex = images.findIndex(
+      (image) =>
+        String(image.id) === active.id
     );
 
+    const newIndex = images.findIndex(
+      (image) =>
+        String(image.id) === over.id
+    );
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    const reorderedImages = arrayMove(
+      images,
+      oldIndex,
+      newIndex
+    ).map((image, index) => ({
+      ...image,
+      position: index + 1,
+    }));
+
     onChange(reorderedImages);
+
     await onReorder?.(reorderedImages);
   }
 
@@ -176,6 +210,7 @@ export function SortableProductImages({
         <p className="text-xs font-black uppercase tracking-widest text-slate-400">
           Nenhuma imagem adicionada
         </p>
+
         <p className="mt-2 text-sm text-slate-500">
           Envie imagens para poder reorganizar a ordem.
         </p>
@@ -190,7 +225,9 @@ export function SortableProductImages({
       onDragEnd={handleDragEnd}
     >
       <SortableContext
-        items={images.map((image) => String(image.id))}
+        items={images.map((image) =>
+          String(image.id)
+        )}
         strategy={rectSortingStrategy}
       >
         <div className="grid grid-cols-3 gap-3">

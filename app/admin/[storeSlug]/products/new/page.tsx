@@ -27,17 +27,32 @@ import type { CategoryResponse } from "@/types";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import {
   SortableProductImages,
   type SortableProductImage,
 } from "@/components/admin/SortableProductImages";
 
+import {
+  isUploadableProductImage,
+  MAX_PRODUCT_IMAGE_SIZE,
+  normalizeImageFile,
+  prepareProductImage,
+} from "@/utils/imageUpload";
+
 export default function NewProductPage() {
   const params = useParams();
   const router = useRouter();
+
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imagesRef = useRef<SortableProductImage[]>([]);
+
   const storeSlug = params.storeSlug as string;
 
   const [name, setName] = useState("");
@@ -46,17 +61,45 @@ export default function NewProductPage() {
   const [categoryId, setCategoryId] = useState<number | "">("");
   const [featured, setFeatured] = useState(false);
   const [inStock, setInStock] = useState(true);
+
   const [images, setImages] = useState<SortableProductImage[]>([]);
 
   const [categories, setCategories] = useState<CategoryResponse[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isProcessingImages, setIsProcessingImages] = useState(false);
+
+  /*
+   * Mantém uma referência da lista mais atual de imagens.
+   *
+   * Isso evita revogar blob URLs enquanto elas ainda estão sendo utilizadas
+   * pelo preview.
+   */
+  useEffect(() => {
+    imagesRef.current = images;
+  }, [images]);
+
+  /*
+   * Libera as blob URLs somente quando a página é desmontada.
+   */
+  useEffect(() => {
+    return () => {
+      imagesRef.current.forEach((image) => {
+        if (image.imageUrl.startsWith("blob:")) {
+          URL.revokeObjectURL(image.imageUrl);
+        }
+      });
+    };
+  }, []);
 
   useEffect(() => {
     async function loadCategories() {
       try {
         setIsLoadingCategories(true);
-        const data = await categoryService.getAdminCategories(storeSlug);
+
+        const data =
+          await categoryService.getAdminCategories(storeSlug);
+
         setCategories(data);
       } catch {
         toast.error("Erro ao carregar categorias.");
@@ -69,16 +112,6 @@ export default function NewProductPage() {
       loadCategories();
     }
   }, [storeSlug]);
-
-  useEffect(() => {
-    return () => {
-      images.forEach((image) => {
-        if (image.imageUrl.startsWith("blob:")) {
-          URL.revokeObjectURL(image.imageUrl);
-        }
-      });
-    };
-  }, [images]);
 
   function handleToggleInStock() {
     setInStock((current) => {
@@ -94,47 +127,107 @@ export default function NewProductPage() {
 
   function handleToggleFeatured() {
     if (!inStock) {
-      toast.error("Produto esgotado não pode ser marcado como destaque.");
+      toast.error(
+        "Produto esgotado não pode ser marcado como destaque."
+      );
+
       return;
     }
 
     setFeatured((current) => !current);
   }
 
-  function handleSelectImages(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleSelectImages(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
     const files = Array.from(e.target.files ?? []);
 
-    if (files.length === 0) return;
+    if (files.length === 0) {
+      return;
+    }
 
     const remainingSlots = 8 - images.length;
 
     if (remainingSlots <= 0) {
-      toast.error("Você pode adicionar no máximo 8 imagens por produto.");
+      toast.error(
+        "Você pode adicionar no máximo 8 imagens por produto."
+      );
+
       e.target.value = "";
       return;
     }
 
     const selectedFiles = files.slice(0, remainingSlots);
 
-    const newImages: SortableProductImage[] = selectedFiles.map(
-      (file, index) => ({
-        id: `temp-${Date.now()}-${index}`,
-        imageUrl: URL.createObjectURL(file),
-        file,
-        position: images.length + index + 1,
-      })
-    );
+    setIsProcessingImages(true);
 
-    setImages((current) => [...current, ...newImages]);
+    try {
+      const preparedImages: SortableProductImage[] = [];
 
-    if (files.length > remainingSlots) {
-      toast.warning(`Apenas ${remainingSlots} imagem(ns) foram adicionadas.`);
+      for (const originalFile of selectedFiles) {
+        try {
+          const preparedFile =
+            await prepareProductImage(originalFile);
+
+          const imageUrl = URL.createObjectURL(preparedFile);
+
+          preparedImages.push({
+            id: `temp-${Date.now()}-${Math.random()
+              .toString(36)
+              .slice(2)}`,
+            imageUrl,
+            file: preparedFile,
+            position: images.length + preparedImages.length + 1,
+          });
+
+          const originalWasHeic =
+            originalFile.type.toLowerCase() === "image/heic" ||
+            originalFile.type.toLowerCase() === "image/heif" ||
+            /\.(heic|heif)$/i.test(originalFile.name);
+
+          if (originalWasHeic) {
+            toast.success(
+              `"${originalFile.name}" foi convertida para JPG automaticamente.`
+            );
+          }
+        } catch (error) {
+          const message =
+            error instanceof Error
+              ? error.message
+              : `Não foi possível processar "${originalFile.name}".`;
+
+          toast.error(message);
+        }
+      }
+
+      if (preparedImages.length > 0) {
+        setImages((current) => [
+          ...current,
+          ...preparedImages.map((image, index) => ({
+            ...image,
+            position: current.length + index + 1,
+          })),
+        ]);
+      }
+
+      if (files.length > remainingSlots) {
+        toast.warning(
+          `Apenas ${remainingSlots} imagem(ns) foram adicionadas.`
+        );
+      }
+    } finally {
+      setIsProcessingImages(false);
+
+      /*
+       * Permite selecionar novamente o mesmo arquivo.
+       */
+      e.target.value = "";
     }
-
-    e.target.value = "";
   }
 
-  function handleRemoveImage(imageToRemove: SortableProductImage) {
+  function handleRemoveImage(
+    imageToRemove: SortableProductImage
+  ) {
     setImages((current) =>
       current
         .filter((image) => image.id !== imageToRemove.id)
@@ -150,22 +243,58 @@ export default function NewProductPage() {
   }
 
   async function handleCreate() {
+    if (isProcessingImages) {
+      toast.error(
+        "Aguarde o processamento das imagens terminar."
+      );
+
+      return;
+    }
+
     if (!name.trim() || !price || !categoryId) {
-      toast.error("Preencha nome, preço e categoria.");
+      toast.error(
+        "Preencha nome, preço e categoria."
+      );
+
+      return;
+    }
+
+    /*
+     * Segurança adicional antes de criar o produto.
+     *
+     * Neste ponto todas as imagens já deveriam estar normalizadas
+     * para JPG, PNG ou WEBP.
+     */
+    const invalidImage = images.find((image) => {
+      if (!image.file) {
+        return true;
+      }
+
+      const normalizedFile = normalizeImageFile(image.file);
+
+      return !isUploadableProductImage(normalizedFile);
+    });
+
+    if (invalidImage) {
+      toast.error(
+        "Existe uma imagem inválida. Use JPG, PNG ou WEBP com no máximo 5 MB."
+      );
+
       return;
     }
 
     try {
       setIsSaving(true);
 
-      const createdProduct = await productService.createProduct(storeSlug, {
-        name: name.trim(),
-        description: description.trim(),
-        price: currencyStringToNumber(price),
-        categoryId: Number(categoryId),
-        inStock,
-        featured: inStock ? featured : false,
-      });
+      const createdProduct =
+        await productService.createProduct(storeSlug, {
+          name: name.trim(),
+          description: description.trim(),
+          price: currencyStringToNumber(price),
+          categoryId: Number(categoryId),
+          inStock,
+          featured: inStock ? featured : false,
+        });
 
       for (const image of images) {
         if (image.file) {
@@ -177,7 +306,9 @@ export default function NewProductPage() {
         }
       }
 
-      router.push(`/admin/${storeSlug}/products?created=true`);
+      router.push(
+        `/admin/${storeSlug}/products?created=true`
+      );
     } catch {
       toast.error("Erro ao criar produto.");
     } finally {
@@ -199,8 +330,9 @@ export default function NewProductPage() {
             </h1>
 
             <p className="mt-1 max-w-2xl text-sm text-slate-500">
-              Cadastre um novo item para aparecer na vitrine pública da loja.
-              Você também pode adicionar e reorganizar imagens antes de criar.
+              Cadastre um novo item para aparecer na vitrine
+              pública da loja. Você também pode adicionar e
+              reorganizar imagens antes de criar.
             </p>
 
             <div
@@ -211,7 +343,10 @@ export default function NewProductPage() {
               }`}
             >
               <CheckCircle2 size={12} />
-              {inStock ? "Produto em estoque ao criar" : "Produto esgotado ao criar"}
+
+              {inStock
+                ? "Produto em estoque ao criar"
+                : "Produto esgotado ao criar"}
             </div>
           </div>
         </div>
@@ -253,7 +388,9 @@ export default function NewProductPage() {
                 placeholder="Descreva tecido, tamanho, diferenciais, uso indicado..."
                 className="min-h-36 w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:bg-white focus:ring-2 focus:ring-slate-900"
                 value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                onChange={(e) =>
+                  setDescription(e.target.value)
+                }
               />
             </div>
 
@@ -273,7 +410,9 @@ export default function NewProductPage() {
                     className="h-13 rounded-2xl border-slate-200 bg-slate-50/60 pl-11"
                     value={price}
                     onChange={(e) =>
-                      setPrice(formatCurrencyInput(e.target.value))
+                      setPrice(
+                        formatCurrencyInput(e.target.value)
+                      )
                     }
                   />
                 </div>
@@ -292,7 +431,9 @@ export default function NewProductPage() {
                     value={categoryId}
                     onChange={(e) =>
                       setCategoryId(
-                        e.target.value === "" ? "" : Number(e.target.value)
+                        e.target.value === ""
+                          ? ""
+                          : Number(e.target.value)
                       )
                     }
                     disabled={isLoadingCategories}
@@ -304,7 +445,10 @@ export default function NewProductPage() {
                     </option>
 
                     {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
+                      <option
+                        key={category.id}
+                        value={category.id}
+                      >
                         {category.name}
                       </option>
                     ))}
@@ -335,11 +479,15 @@ export default function NewProductPage() {
 
                 <div>
                   <p className="text-sm font-black text-slate-900">
-                    {inStock ? "Produto em estoque" : "Produto esgotado"}
+                    {inStock
+                      ? "Produto em estoque"
+                      : "Produto esgotado"}
                   </p>
+
                   <p className="text-xs text-slate-500">
-                    Produtos esgotados aparecem no catálogo, mas não podem ir
-                    para destaque, novidades ou carrinho.
+                    Produtos esgotados aparecem no catálogo,
+                    mas não podem ir para destaque, novidades
+                    ou carrinho.
                   </p>
                 </div>
               </div>
@@ -362,7 +510,11 @@ export default function NewProductPage() {
                 featured
                   ? "border-amber-200 bg-amber-50"
                   : "border-slate-200 bg-slate-50/60 hover:bg-white"
-              } ${!inStock ? "cursor-not-allowed opacity-60" : ""}`}
+              } ${
+                !inStock
+                  ? "cursor-not-allowed opacity-60"
+                  : ""
+              }`}
             >
               <div className="flex items-center gap-3">
                 <div
@@ -379,6 +531,7 @@ export default function NewProductPage() {
                   <p className="text-sm font-black text-slate-900">
                     Produto em destaque
                   </p>
+
                   <p className="text-xs text-slate-500">
                     {!inStock
                       ? "Produto esgotado não pode ser destacado."
@@ -401,15 +554,26 @@ export default function NewProductPage() {
             <div className="flex justify-end border-t border-slate-100 pt-6">
               <Button
                 onClick={handleCreate}
-                disabled={isSaving || !name.trim() || !price || !categoryId}
+                disabled={
+                  isSaving ||
+                  isProcessingImages ||
+                  !name.trim() ||
+                  !price ||
+                  !categoryId
+                }
                 className="h-12 rounded-xl bg-slate-900 px-8 font-bold"
               >
-                {isSaving ? (
+                {isSaving || isProcessingImages ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
                   <Save className="mr-2 h-4 w-4" />
                 )}
-                {isSaving ? "Criando..." : "Criar produto"}
+
+                {isProcessingImages
+                  ? "Processando imagens..."
+                  : isSaving
+                    ? "Criando..."
+                    : "Criar produto"}
               </Button>
             </div>
           </CardContent>
@@ -432,13 +596,25 @@ export default function NewProductPage() {
 
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={images.length >= 8}
+                onClick={() =>
+                  fileInputRef.current?.click()
+                }
+                disabled={
+                  images.length >= 8 ||
+                  isProcessingImages
+                }
                 className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 px-4 py-4 text-slate-500 transition-all hover:border-slate-300 hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
               >
-                <UploadCloud className="h-5 w-5" />
+                {isProcessingImages ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <UploadCloud className="h-5 w-5" />
+                )}
+
                 <span className="text-xs font-black uppercase tracking-widest">
-                  Adicionar imagens
+                  {isProcessingImages
+                    ? "Processando..."
+                    : "Adicionar imagens"}
                 </span>
               </button>
 
@@ -447,13 +623,12 @@ export default function NewProductPage() {
                 ref={fileInputRef}
                 onChange={handleSelectImages}
                 className="hidden"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
                 multiple
               />
 
               <p className="text-xs leading-relaxed text-slate-400">
-                Arraste para reorganizar. A primeira imagem será enviada como
-                principal. Limite: 8 imagens.
+                Limite de 8 imagens
               </p>
             </CardContent>
           </Card>
@@ -470,6 +645,7 @@ export default function NewProductPage() {
                 <p className="text-xs font-black uppercase tracking-widest text-slate-400">
                   Produto
                 </p>
+
                 <p className="mt-1 font-bold text-slate-900">
                   {name || "Nome do produto"}
                 </p>
@@ -479,9 +655,12 @@ export default function NewProductPage() {
                 <p className="text-xs font-black uppercase tracking-widest text-slate-400">
                   Preço
                 </p>
+
                 <p className="mt-1 font-bold text-slate-900">
                   {price
-                    ? currencyStringToNumber(price).toLocaleString("pt-BR", {
+                    ? currencyStringToNumber(
+                        price
+                      ).toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
                       })
@@ -493,6 +672,7 @@ export default function NewProductPage() {
                 <p className="text-xs font-black uppercase tracking-widest text-slate-400">
                   Imagens
                 </p>
+
                 <p className="mt-1 font-bold text-slate-900">
                   {images.length > 0
                     ? `${images.length} imagem(ns)`
@@ -504,6 +684,7 @@ export default function NewProductPage() {
                 <p className="text-xs font-black uppercase tracking-widest text-slate-400">
                   Status
                 </p>
+
                 <p className="mt-1 font-bold text-slate-900">
                   {!inStock
                     ? "Esgotado"
