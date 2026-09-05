@@ -136,12 +136,6 @@ export function GbGamesProductTemplate({ store, product, relatedProducts = [] }:
 
             {/* Top badges */}
             <div className="flex flex-wrap gap-2 mb-6">
-              <div className="flex items-center gap-2 rounded-xl border border-[#7B2CFF]/25 bg-[#7B2CFF]/8 px-4 py-2">
-                <Zap size={10} className="text-[#F5C542]" fill="#F5C542" />
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-[#C084FC]">
-                  Gamer Premium
-                </span>
-              </div>
 
               {hasDiscount && (
                 <div className="flex items-center gap-2 rounded-xl border border-emerald-500/25 bg-emerald-500/8 px-4 py-2">
