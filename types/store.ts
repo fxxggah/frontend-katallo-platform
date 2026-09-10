@@ -5,7 +5,9 @@
 export type StoreTemplate =
   | "MINIMAL"
   | "GBGAMES"
-  | "ESTER";
+  | "ESTER"
+  | "DEPAULA";
+  // adicione novos templates aqui
 
 export type StoreRequest = {
   name: string;

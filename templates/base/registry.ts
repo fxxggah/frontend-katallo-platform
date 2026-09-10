@@ -3,12 +3,14 @@ import type { StoreTemplateModule } from "./types";
 import { minimalTemplate } from "../minimal";
 import { gbGamesTemplate } from "../gbgames";
 import { esterTemplate } from "../clients/ester";
+import { depaulaTemplate } from "../clients/depaula";
 // adicione novos templates aqui
 
 const templateRegistry: Record<string, StoreTemplateModule> = {
   MINIMAL: minimalTemplate,
   GBGAMES: gbGamesTemplate,
   ESTER: esterTemplate,
+  DEPAULA: depaulaTemplate,
   // adicione novos templates aqui
 };
 
