@@ -12,6 +12,7 @@ import { GbGamesFooter } from "../components/GbGamesFooter";
 import { GbGamesCategoryCard } from "../components/GbGamesCategoryCard";
 import { GbGamesProductCard } from "../components/GbGamesProductCard";
 import { GbGamesParticles } from "../components/GbGamesParticles";
+import { HorizontalCarousel } from "@/components/store/HorizontalCarousel";
 
 type GbGamesHomeTemplateProps = {
   store: StoreResponse;
@@ -121,6 +122,10 @@ export function GbGamesHomeTemplate({
     (p) => p.inStock
   );
 
+  // Classes personalizadas para os botões do carrossel na versão GB Games
+  const gbGamesButtonClasses = 
+    "border-[#7B2CFF]/35 bg-[#0A0018] text-[#A855F7] hover:border-[#A855F7]/60 hover:bg-[#7B2CFF]/20 hover:text-white hover:shadow-[0_0_20px_rgba(123,44,255,0.35)]";
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#06040F] text-white">
       {/* Global particle canvas */}
@@ -143,14 +148,18 @@ export function GbGamesHomeTemplate({
               subtitle="Encontre exatamente o que você precisa para o seu setup."
             />
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              {categories.map((category) => (
-                <GbGamesCategoryCard
-                  key={category.id}
-                  store={store}
-                  category={category}
-                />
-              ))}
+            <div className="px-6">
+              <HorizontalCarousel
+                items={categories}
+                itemClassName="w-[260px] flex-none md:w-[300px]"
+                buttonClasses={gbGamesButtonClasses}
+                renderItem={(category) => (
+                  <GbGamesCategoryCard
+                    store={store}
+                    category={category}
+                  />
+                )}
+              />
             </div>
           </section>
         )}
@@ -167,14 +176,18 @@ export function GbGamesHomeTemplate({
               accent="gold"
             />
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {featuredProducts.map((product) => (
-                <GbGamesProductCard
-                  key={product.id}
-                  store={store}
-                  product={product}
-                />
-              ))}
+            <div className="px-6">
+              <HorizontalCarousel
+                items={featuredProducts}
+                itemClassName="w-[220px] flex-none sm:w-[250px] md:w-[270px]"
+                buttonClasses={gbGamesButtonClasses}
+                renderItem={(product) => (
+                  <GbGamesProductCard
+                    store={store}
+                    product={product}
+                  />
+                )}
+              />
             </div>
           </section>
         )}
@@ -243,14 +256,18 @@ export function GbGamesHomeTemplate({
               subtitle="Explore todo o catálogo GB Games."
             />
 
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {availableProducts.map((product) => (
-                <GbGamesProductCard
-                  key={product.id}
-                  store={store}
-                  product={product}
-                />
-              ))}
+            <div className="px-6">
+              <HorizontalCarousel
+                items={availableProducts}
+                itemClassName="w-[220px] flex-none sm:w-[250px] md:w-[270px]"
+                buttonClasses={gbGamesButtonClasses}
+                renderItem={(product) => (
+                  <GbGamesProductCard
+                    store={store}
+                    product={product}
+                  />
+                )}
+              />
             </div>
           </section>
         )}
